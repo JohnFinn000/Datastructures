@@ -19,6 +19,7 @@
 template<class T>
 class List {
 private:
+
 	struct link {
 		T    *node;
 		link *next;
@@ -28,8 +29,14 @@ private:
 	link **tail;
 
 public:
+
 	class iterator {
+	private:
+
+		link *current;
+
 	public:
+
 		iterator();
 		iterator( link *start );
 		
@@ -37,7 +44,7 @@ public:
 		T get();
 
 		void insert( T *node ); // not implemented
-		void set( T *node ); // not implemented
+		void set( T *node );    // not implemented
 
         bool end();
         bool start();
@@ -51,8 +58,7 @@ public:
 		bool operator==( List l );
 		bool operator==( iterator *iter );
 		bool operator!=( iterator *iter );
-	private:
-		link *current;
+
 	};
 
 //constructor

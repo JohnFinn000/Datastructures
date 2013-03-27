@@ -15,13 +15,14 @@
  *
  * =====================================================================================
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-
-#define VERBOSE 0
+#include "sort.h"
 
 void selection_sort( int arr[], int size ) {
+
+    selection_sort( arr, size, compare );
+}
+
+void selection_sort( int arr[], int size, bool (*compfunc)(int, int) ) {
 
 
 	// first make sure there is enough to bother sorting
@@ -42,16 +43,14 @@ void selection_sort( int arr[], int size ) {
 #endif
 
 		for( int j = index_lowest = i; j < size; ++j ) {
-			if( arr[index_lowest] > arr[j] ) {
+			if( compfunc( arr[index_lowest], arr[j] ) ) {
 				index_lowest = j;
 			}
 		}
 
 		// swap the values
 		if( i != index_lowest ) {
-			arr[i] ^= arr[index_lowest];
-			arr[index_lowest] ^= arr[i];
-			arr[i] ^= arr[index_lowest];
+            SWAP( arr[i], arr[index_lowest] );
 		}
 
 	}

@@ -15,24 +15,21 @@
  *
  * =====================================================================================
  */
+#include "sort.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
+void insertion_sort( int arr[], int size ) {
 
-#define VERBOSE 1
-
+    insertion_sort( arr, size, compare );
+}
 
 //allow ascending or descending
-void insertion_sort( int arr[], int size ) {
+void insertion_sort( int arr[], int size, bool (*compfunc)(int, int) ) {
 
 
 	// first make sure there is enough to bother sorting
 	if( size < 2 ) {
 		return;
 	}
-
-	int index_lowest = 0;
 
 	for( int i = 0; i < size; ++i ) {
 
@@ -46,10 +43,8 @@ void insertion_sort( int arr[], int size ) {
 
 		// swap the values
 		for( int j = i; j > 0; --j ) {
-			if( arr[j] < arr[j-1] ) {
-				arr[j] ^= arr[j-1];
-				arr[j-1] ^= arr[j];
-				arr[j] ^= arr[j-1];
+			if( compfunc( arr[j], arr[j-1] ) ) {
+                SWAP( arr[j], arr[j-1] );
 			} else {
 				break;
 			}

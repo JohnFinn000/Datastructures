@@ -17,13 +17,9 @@
  *
  * =====================================================================================
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
 #include "sort.h"
 
-#define VERBOSE 1
-
+/*
 void bubble_sort( int arr[], int size ) {
 
 	// first make sure there is enough to bother sorting
@@ -53,9 +49,7 @@ void bubble_sort( int arr[], int size ) {
 
 			// swap the values if the left value is the larger
 			if( arr[j] > arr[j+1] ) {
-				arr[j] ^= arr[j+1];
-				arr[j+1] ^= arr[j];
-				arr[j] ^= arr[j+1];
+                SWAP( arr[j], arr[j+1] );
 			}
 		}
 	}
@@ -70,9 +64,18 @@ void bubble_sort( int arr[], int size ) {
 #endif
 
 }
+*/
 
-/*
+
+bool compare( int a, int b ) {
+    return a > b;
+}
+
 void bubble_sort( int arr[], int size ) {
+    bubble_sort( arr, size, compare );
+}
+
+void bubble_sort( int arr[], int size, bool (*compfunc)( int, int ) ) {
 
 	// first make sure there is enough to bother sorting
 	if( size < 2 ) {
@@ -82,12 +85,10 @@ void bubble_sort( int arr[], int size ) {
 	for( int i = 0; i < size; ++i ) {
 		for( int j = 0; j < (size - i) - 1; ++j ) {
 			// swap the values if the left value is the larger
-			if( compare( arr[j],  arr[j+1] ) ) {
-				arr[j] ^= arr[j+1];
-				arr[j+1] ^= arr[j];
-				arr[j] ^= arr[j+1];
+			if( compfunc( arr[j], arr[j+1] ) ) {
+                SWAP( arr[j], arr[j+1] );
 			}
 		}
 	}
 }
-*/
+

@@ -15,21 +15,13 @@
  *
  * =====================================================================================
  */
-#include <stdlib.h>
 
 #define VERBOSE 1
 
 void unsort( int arr[], int size ) {
 
-	int array[size];
+    
 
-	srand(time(NULL));
-
-	for( int i = 0; i < 10; ++i ) {
-		array[i] = rand() % 100;
-	}
-
-	// mergesort the array
 
 }
 

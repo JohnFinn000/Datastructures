@@ -3,10 +3,10 @@ CC = g++
 CFLAGS = -g -Wall
 OBJDIR = obj
 
-OBJECTS = bubblesort.o insertionsort.o mergesort.o selectionsort.o unsort.o unittest.o
+OBJECTS = bubblesort.o insertionsort.o mergesort.o selectionsort.o unsort.o unit_test.o
 
-unittest: $(OBJECTS)
-	$(CC) $(FLAGS) -o unittest $(OBJECTS)
+unit_test: $(OBJECTS)
+	$(CC) $(FLAGS) -o unit_test $(OBJECTS)
 
 bubblesort.o: bubblesort.cpp sort.h
 	$(CC) $(CFLAGS) -c bubblesort.cpp
@@ -23,7 +23,7 @@ selectionsort.o: selectionsort.cpp sort.h
 unsort.o: unsort.cpp sort.h
 	$(CC) $(CFLAGS) -c unsort.cpp
 
-unittest.o: unittest.cpp
+unit_test.o: unit_test.cpp
 	$(CC) $(CFLAGS) -c unit_test.cpp
 
 clean:

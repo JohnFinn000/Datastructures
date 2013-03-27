@@ -22,25 +22,27 @@ int main() {
 
     Point pointa;
     for( int i = 0; i <= 10; ++i ) {
-        printf("pointa) x: %d, y: %d, hilbert: %d\n", pointa.get_x(), pointa.get_y(), pointa.get_hilbert() );
+        printf("pointa) x: %lu, y: %lu, hilbert: %lu\n", pointa.get_x(), pointa.get_y(), pointa.get_hilbert() );
         pointa.set_x( i );
 
     }
 
+    pointa.set_y( 1 );
+    for( int i = 0; i <= 10; ++i ) {
+        pointa.set_x( i );
+        printf("pointa) x: %lu, y: %lu, hilbert: %lu\n", pointa.get_x(), pointa.get_y(), pointa.get_hilbert() );
+
+    }
+
     Point pointb( 5, 6 );
-    printf("\npointb) x: %d, y: %d, hilbert: %d\n", pointb.get_x(), pointb.get_y(), pointb.get_hilbert() );
+    printf("\npointb) x: %lu, y: %lu, hilbert: %lu\n\n", pointb.get_x(), pointb.get_y(), pointb.get_hilbert() );
 
     Point pointc( 0 );
-    for( int i = 0; i <= 10; ++i ) {
-    printf("pointc) x: %d, y: %d, hilbert: %d\n", pointc.get_x(), pointc.get_y(), pointc.get_hilbert() );
+    for( int i = 0; i <= 25; ++i ) {
+    printf("pointc) x: %lu, y: %lu, hilbert: %lu\n", pointc.get_x(), pointc.get_y(), pointc.get_hilbert() );
         pointc.set_hilbert( pointc.get_hilbert() + 1 );
 
     }
-    pointc.set_hilbert( 12 );
-    printf("pointc) x: %d, y: %d, hilbert: %d\n", pointc.get_x(), pointc.get_y(), pointc.get_hilbert() );
-    pointc.set_hilbert( 13 );
-    printf("pointc) x: %d, y: %d, hilbert: %d\n", pointc.get_x(), pointc.get_y(), pointc.get_hilbert() );
-
 
 
 }

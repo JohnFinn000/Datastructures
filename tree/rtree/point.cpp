@@ -34,10 +34,23 @@ Point::Point( uint64_t hilbert ) {
 	set_hilbert( hilbert );
 }
 
+char *int_to_binary( uint64_t num, int precision ) {
+    
+    char *arr = (char*) malloc( sizeof(char) * (precision + 1) );
+    arr[precision] = '\0';
+
+    for( uint64_t i = precision; i > 0; --i ) {
+        arr[precision-i] = (num & (1 << (i-1))) ? '1' : '0';
+    }
+    
+    return arr;
+
+}
+
+
 //destructor
 //private
 void Point::point_to_hilbert( uint64_t x, uint64_t y, uint64_t &hilbert ) {
-    printf("calculating hilbert value\n");
 	/*
 		   current_state
 		   /  x coord
@@ -46,19 +59,23 @@ void Point::point_to_hilbert( uint64_t x, uint64_t y, uint64_t &hilbert ) {
 code	0 0 0 0
 	*/
 	uint64_t code;
-	uint64_t hilbert_value;
+	uint64_t hilbert_value = 0;
+	uint64_t curve_length  = 0;
 	uint64_t current_state = 0;
 
-	for( int step = 0; step <= order; ++step ) {
+
+	for( int step = order; step >= 0; --step ) {
 
 		code  = current_state << 2;
-		code |= ( x & ( 1 << (order - step) ) ) ? 2 : 0;
-		code |= ( y & ( 1 << (order - step) ) ) ? 1 : 0;
+		code |= ( x & ( 1 << step ) ) ? 2 : 0;
+		code |= ( y & ( 1 << step ) ) ? 1 : 0;
 
-		current_state = hilbert_table[code];
+		curve_length  = hilbert_table[0][code];
+        current_state = hilbert_table[1][code];
 
 		hilbert_value <<= 2;
-		hilbert_value |= current_state;
+		hilbert_value |= curve_length;
+
 	}
 
 	hilbert = hilbert_value;
@@ -66,7 +83,6 @@ code	0 0 0 0
 }
 
 void Point::hilbert_to_point( uint64_t hilbert, uint64_t &x, uint64_t &y ) {
-    printf("calculating points\n");
 	/*
 		   old_state
 		   /  new_state
@@ -77,16 +93,24 @@ code	0 0 0 0
 	uint64_t code = 0;
 	uint64_t old_state = 0;
 	uint64_t new_state = 0;
+    uint64_t hil = 0;
 	uint64_t num = 0;
+    x = 0;
+    y = 0;
 
-	for( int step = 0; step <= order; ++step ) {
+	for( int step = order; step >= 0; --step ) {
 
-		new_state = hilbert & ( 3 << ((order - step) * 2) );
-		new_state >>= (step-1) * 2;
+        new_state = 0;
+        code = 0;
+        hil = 0;
 
-		code = old_state;
-		code <<= 2;
-		code |= new_state;
+		hil |= ( hilbert & ( 2 << (step * 2) ) ) ? 2 : 0;
+		hil |= ( hilbert & ( 1 << (step * 2) ) ) ? 1 : 0;
+
+		code |= ( old_state << 2 );
+		code |= hil;
+
+        new_state = state_table[code];
 
 		num = xy_table[code];
 
@@ -96,6 +120,7 @@ code	0 0 0 0
 		y |= (num & 1) ? 1 : 0;
 
 		old_state = new_state;
+
 	}
 
 }

@@ -1,16 +1,18 @@
 
-
-
-
-
 CC = g++ 
 CFLAGS = -g -Wall
 OBJDIR = obj 
 
-OBJECTS = rtree.o unittest.o
+OBJECTS = point.o shape.o rtree.o unittest.o
 
 unit_test: $(OBJECTS)
     $(CC) $(CFLAGS) -o unit_test $(OBJECTS)
+
+point.o: point.cpp point.h
+    $(CC) $(CFLAGS) -c point.cpp
+
+shape.o: shape.cpp shape.h
+    $(CC) $(CFLAGS) -c shape.cpp
 
 rtree.o: rtree.cpp rtree.h
     $(CC) $(CFLAGS) -c rtree.cpp

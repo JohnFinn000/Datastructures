@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "dynamic_array.hh"
+#include "dynamic_array.hxx"
 
 int main() {
 
@@ -30,7 +30,6 @@ int main() {
 
     printf("capacity: %d, size: %d\n", dyn_arr.get_capacity(), dyn_arr.get_size() );
 
-    
     printf("getting and changing elements \n");
     int size = dyn_arr.get_size();
     for( int i = 0; i < size; ++i ) {
@@ -56,6 +55,37 @@ int main() {
     printf("iterator backward \n");
     iter = dyn_arr.end();
     for( ; !iter->start(); iter->previous() ) {
+        printf("%d\n", iter->get() );
+    }
+
+    Dynamic_array<int>::mass m( &dyn_arr );
+    
+    printf("iterator forward \n");
+    iter = dyn_arr.begin();
+    for( ; !iter->end(); iter->next() ) {
+        printf("%d\n", iter->get() );
+    }
+
+    m.add( 25 );
+
+    printf("iterator forward \n");
+    iter = dyn_arr.begin();
+    for( ; !iter->end(); iter->next() ) {
+        printf("%d\n", iter->get() );
+    }
+
+    int s;
+    int *a = m.get( s );
+    m %= 5;
+    m.pow(1);
+
+    for( int i = 0; i < s; ++i ) {
+        printf("%d, ", a[i] );
+    }
+
+    printf("iterator forward \n");
+    iter = dyn_arr.begin();
+    for( ; !iter->end(); iter->next() ) {
         printf("%d\n", iter->get() );
     }
 }

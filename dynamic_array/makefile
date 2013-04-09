@@ -4,15 +4,12 @@ CC = g++
 CFLAGS = -g -Wall
 OBJDIR = obj
 
-OBJECTS = dynamic_array.o unit_test.o
+OBJECTS = unit_test.o
 
 unit_test: $(OBJECTS)
 	$(CC) $(CFLAGS) -o unit_test $(OBJECTS)
 
-dynamic_array.o: dynamic_array.cc dynamic_array.hh dynamic_array.hxx
-	$(CC) $(CFLAGS) -c dynamic_array.cc
-
-unit_test.o: unit_test.cpp
+unit_test.o: unit_test.cpp dynamic_array.hh dynamic_array.hxx
 	$(CC) $(CFLAGS) -c unit_test.cpp
 
 clean:

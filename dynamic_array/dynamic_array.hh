@@ -17,7 +17,9 @@
  */
 #ifndef _DYNAMIC_ARRAY_HH__
 #define _DYNAMIC_ARRAY_HH__
-
+#include <stdlib.h>
+#include <math.h>
+#include "../linkedlist/list.h"
 
 template<class T>
 class Dynamic_array {
@@ -72,58 +74,73 @@ public:
  *  it is important to note that changes to the array should not
  *  be made at the same time a mass is in use
  *
- *
- *
  *  */
     class mass {
+    private:
+        Dynamic_array<T> *owner;
+        int *indices;
+        int num_indices;
+        int size;
+
     public:
+        //constructors
         mass();
+        mass( Dynamic_array<T> *o );
 
-        bool equal( T param );
-        bool not_equal( T param );
-        bool greater( T param );
-        bool greater_equal( T param );
-        bool less( T param );
-        bool less_equal( T param );
-        bool between( T param1, T param2 );
+        //logic functions
+        mass &equal(         T param );
+        mass &not_equal(     T param );
+        mass &greater(       T param );
+        mass &greater_equal( T param );
+        mass &less(          T param );
+        mass &less_equal(    T param );
+        mass &between(       T param1, T param2 );
 
-        void add( T param );
-        void subtract( T param );
-        void multiply( T param );
-        void divide( T param );
-        void modulo( T param );
+        mass &and_op( T param );
+        mass &or_op(  T param );
 
-        void pow( int param );
+        //arithmetic functions
+        mass &add(      T param );
+        mass &subtract( T param );
+        mass &multiply( T param );
+        mass &divide(   T param );
+        mass &modulo(   T param );
 
-        void sort_ascending();
-        void sort_descending();
+        mass &pow( int param );
 
+        void sort_ascending( );
+        void sort_descending( );
+
+        T *get( int &size ); // not implemented
+        mass &duplicate();
+        int get_size();
 
         //sugar 
         
         //logic operators 
-        bool operator==( T param );          // equal
-        bool operator!=( T param );          // not_equal
-        bool operator>(  T param );          // greater
-        bool operator>=( T param );          // greater_equal
-        bool operator<(  T param );          // less
-        bool operator<=( T param );          // less_equal
-        bool operator()( T param, T param ); // between
+        mass &operator==( T param );            // equal
+        mass &operator!=( T param );            // not_equal
+        mass &operator>(  T param );            // greater
+        mass &operator>=( T param );            // greater_equal
+        mass &operator<(  T param );            // less
+        mass &operator<=( T param );            // less_equal
+        mass &operator()( T param1, T param2 ); // between
+
+        mass &operator&&( mass param );
+        mass &operator||( mass param );
 
 
-        // use threads if possible       
-        void operator+=( T param ); 
-        void operator-=( T param ); 
-        void operator*=( T param ); 
-        void operator/=( T param ); 
-        void operator%=( T param ); 
+        T operator+=( T param ); // add
+        T operator-=( T param ); // subtract
+        T operator*=( T param ); // multiply
+        T operator/=( T param ); // divide
+        T operator%=( T param ); // modulo
 
-        // don't thread
-        void operator+( T param ); 
-        void operator-( T param ); 
-        void operator*( T param ); 
-        void operator/( T param ); 
-        void operator%( T param ); 
+        mass &operator+( T param ); 
+        mass &operator-( T param ); 
+        mass &operator*( T param ); 
+        mass &operator/( T param ); 
+        mass &operator%( T param ); 
 
         //misc
         T operator++(int); // suffix 
@@ -131,12 +148,8 @@ public:
         // sort
         void operator+(); // sort_ascending
         void operator-(); // sort_descending
-        
 
-    private:
-        Dynamic_array<T> *owner;
-        int indices[];
-        int num_indices;
+        bool operator!( );
 
     };
 
@@ -154,6 +167,9 @@ public:
 //mutators
     void add( T num );
     void add( T arr[], int arr_size );
+    void add( Dynamic_array<T> *d_arr );
+    void add( List<T> *list );
+
     void insert( T num, int index );
 
 //inspectors
@@ -170,6 +186,8 @@ public:
 
     Dynamic_array<T>::iterator *begin();
     Dynamic_array<T>::iterator *end();
+
+    Dynamic_array<T>::mass *mass_op();
 
 //sugar
     T& operator[]( int index ); // does not do bounds checking (get_now)

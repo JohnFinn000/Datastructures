@@ -21,29 +21,43 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define SWAP( a, b ) \
-a ^= b;\
-b ^= a;\
-a ^= b;
-
 #define VERBOSE 0
 
-void print_array( int arr[], int size );
-bool compare( int a, int b );
+template <typename T>
+void print_array( T arr[], int size );
 
+template <typename T>
+bool compare( T a, T b );
 
-void bubble_sort( int arr[], int size );
-void bubble_sort( int arr[], int size, bool (*compfunc)(int, int) );
+template <typename T>
+void bubble_sort( T arr[], int size );
+template <typename T>
+void bubble_sort( T arr[], int size, bool (*compfunc)( T, T ) );
 
-void insertion_sort( int arr[], int size );
-void insertion_sort( int arr[], int size, bool (*compfunc)(int, int) );
+template <typename T>
+void insertion_sort( T arr[], int size );
+template <typename T>
+void insertion_sort( T arr[], int size, bool (*compfunc)(T, T) );
 
-void selection_sort( int arr[], int size );
-void selection_sort( int arr[], int size, bool (*compfunc)(int, int) );
+template <typename T>
+void selection_sort( T arr[], int size );
+template <typename T>
+void selection_sort( T arr[], int size, bool (*compfunc)(T, T) );
 
-void merge_sort( int arr[], int size );
-void merge_sort( int arr[], int size, bool (*compfunc)(int, int) );
+template <typename T>
+void merge_sort( T arr[], int size );
+template <typename T>
+void merge_sort( T arr[], int size, bool (*compfunc)(T, T) );
 
-void unsort( int arr[], int size );
+template <typename T>
+void unsort( T arr[], int size );
+
+#include "utilities.hxx"
+#include "bubble_sort.hxx"
+#include "selection_sort.hxx"
+#include "insertion_sort.hxx"
+#include "merge_sort.hxx"
+#include "unsort.hxx"
 
 #endif
+

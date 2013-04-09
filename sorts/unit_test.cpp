@@ -16,35 +16,56 @@
  * =====================================================================================
  */
 #include "sort.h"
-
-void print_array( int arr[], int size ) {
-
-    if( size >= 1 ) {
-        printf("{ %d", arr[0]);
-        for( int i = 1; i < size; ++i ) {
-            printf(", %d", arr[i] );
-        }
-        printf(" }\n");
-    }
-
-}
-
-bool descending_compare( int a, int b ) {
-    return a > b;
-}
+#include <time.h>
 
 int main() {
 
-    int test_array[] = { 6, 4, 2, 3, 1, 7, 7, 8, 2, 2, 2, 4 };
+    int test_array[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
+    printf("%-*s", 20, "initial" );
     print_array( test_array, 12 );
+    clock_t t = clock();
 
-    //bubble_sort( test_array, 12, descending_compare );
-    //insertion_sort( test_array, 12 );
-    //selection_sort( test_array, 12 );
-    merge_sort( test_array, 12 );
-
+    printf("%-*s", 20, "unsort" );
+    for( int i = 0; i < 1000000; ++i ) {
+        unsort( test_array, 12 );
+    }
     print_array( test_array, 12 );
+    printf("%ld\n", clock() - t );
+
+    t = clock();
+    printf("%-*s", 20, "bubble_sort");
+    for( int i = 0; i < 1000000; ++i ) {
+        unsort( test_array, 12 );
+        bubble_sort( test_array, 12 );
+    }
+    print_array( test_array, 12 );
+    printf("%ld\n", clock() - t );
+
+    t = clock();
+    printf("%-*s", 20, "insertion_sort");
+    for( int i = 0; i < 1000000; ++i ) {
+        unsort( test_array, 12 );
+        insertion_sort( test_array, 12 );
+    }
+    print_array( test_array, 12 );
+    printf("%ld\n", clock() - t );
+    t = clock();
+
+    printf("%-*s", 20, "selection_sort");
+    for( int i = 0; i < 1000000; ++i ) {
+        unsort( test_array, 12 );
+        selection_sort( test_array, 12 );
+    }
+    print_array( test_array, 12 );
+    printf("%ld\n", clock() - t );
+    t = clock();
+
+
+    //printf("merge_sort");
+    //unsort( test_array, 12 );
+    //merge_sort( test_array, 12 );
+    //print_array( test_array, 12 );
 
 
 }

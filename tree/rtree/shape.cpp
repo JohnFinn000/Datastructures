@@ -15,35 +15,38 @@
  *
  * =====================================================================================
  */
-#include <shape.h>
+#include "shape.h"
 
 //Shape
 //constructor
 Shape::Shape() {
 	num_points = 0;
-	list_points = NULL;
+    bounds = new Rectangle( 0,0,0,0 );
 	bounds_current = false;
 }
 
 //destructor
 //private
 void Shape::fit_bounds() {
-	int min_x;
-	int min_y;
-	int max_x;
-	int max_y;
-	Point iter;
+	uint64_t min_x; // only actually needs to check new points
+	uint64_t min_y;
+	uint64_t max_x;
+	uint64_t max_y;
 
-	min_x = max_x = iter->x();
-	min_y = max_y = iter->y();
+	Dynamic_array<Point*>::iterator *iter = list_points.begin();
 
-	for( int i = 0; i < num_points; ++i ) {
-		iter->x() > max_x ? max_x = iter->x() : 
-		iter->x() < min_x ? min_x = iter->x() : 0;
+	min_x = max_x = iter->get()->get_x();
+	min_y = max_y = iter->get()->get_y();
 
-		iter->y() > max_y ? max_y = iter->y() : 
-		iter->y() < min_y ? min_y = iter->y() : 0;
+	for( ; !iter->end(); iter->next() ) {
+		iter->get()->get_x() > max_x ? max_x = iter->get()->get_x() : 
+		iter->get()->get_x() < min_x ? min_x = iter->get()->get_x() : 0;
+
+		iter->get()->get_y() > max_y ? max_y = iter->get()->get_y() : 
+		iter->get()->get_y() < min_y ? min_y = iter->get()->get_y() : 0;
 	}
+
+    bounds->set( min_x, min_y, max_x, max_y );
 
 	bounds_current = true;
 }
@@ -59,53 +62,75 @@ Rectangle *Shape::get_bounds() {
 
 }
 
-void Shape::add_point() {
+uint64_t Shape::get_hilbert() {
+	return bounds->get_hilbert();
+}
 
+Point **Shape::get_points( int &size ) {
+
+
+}
+
+void Shape::add_point( uint64_t x, uint64_t y ) {
+    Point *new_point = new Point( x, y );
+
+    list_points.add( new_point );
+    ++num_points;
+
+    bounds_current = false;
+}
+
+void Shape::add_point( Point *p ) {
+
+    list_points.add( p );
+    ++num_points;
+
+    bounds_current = false;
 }
 
 bool Shape::check_intersection( Point *point ) {
-	bounds->check_intersection( point );
-
+	return bounds->check_intersection( point );
 }
 
 bool Shape::check_intersection( Rectangle *rectangle ) {
-	bounds->check_intersection( rectangle );
-
+	return bounds->check_intersection( rectangle );
 }
 
 bool Shape::check_intersection( Shape *shape ) {
-	bounds->check_intersection( shape );
+	return bounds->check_intersection( shape->bounds );
+}
+
+void Shape::rotate( uint64_t x, uint64_t y ) {
 
 }
 
-void Shape::rotate() {
+void Shape::move( uint64_t x, uint64_t y ) {
+	Dynamic_array<Point*>::iterator *iter = list_points.begin();
 
-}
+	for( ; !iter->end(); iter->next() ) {
+        iter->get()->set_x( iter->get()->get_x() + x );
+        iter->get()->set_y( iter->get()->get_y() + y );
+    }
 
-void Shape::move() {
-
-}
-
-int Shape::get_hilbert() {
-	return p_center.get_hilbert();
+    bounds_current = false;
 }
 
 bool Shape::operator>( Shape &shape ) {
-	if( this.p_center.get_hilbert() > rectangle.p_center.get_hilbert() ) {
+	if( get_hilbert() > shape.get_hilbert() ) {
 		return true;
 	}
 	return false;
 }
 
 bool Shape::operator<( Shape &shape ) {
-	if( this.p_center.get_hilbert() < rectangle.p_center.get_hilbert() ) {
+	if( get_hilbert() < shape.get_hilbert() ) {
 		return true;
 	}
 	return false;
 }
 
 bool Shape::operator==( Shape &shape ) {
-	if( this.p_center.get_hilbert() == rectangle.p_center.get_hilbert() ) {
+	if( get_hilbert() == shape.get_hilbert() ) {
 		return true;
 	}
 	return false;
@@ -122,7 +147,7 @@ Rectangle::Rectangle() {
 	set( 0, 0, 0, 0 );
 }
 
-Rectangle::Rectangle( int min_x, int min_y, int max_x, int max_y ) {
+Rectangle::Rectangle( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y ) {
 
 	set( min_x, min_y, max_x, max_y );
 }
@@ -132,20 +157,20 @@ Rectangle::Rectangle( int min_x, int min_y, int max_x, int max_y ) {
 
 //public
 
-void Rectangle::set( int min_x, int min_y, int max_x, int max_y ) {
+void Rectangle::set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y ) {
 
 	p_ul = new Point( min_x, min_y );
 	p_ur = new Point( max_x, min_y );
 	p_ll = new Point( min_x, max_y );
 	p_lr = new Point( max_x, max_y );
 
-	this.min_x = min_x;
-	this.min_y = min_y;
-	this.max_x = max_x;
-	this.max_y = max_y;
+	this->min_x = min_x;
+	this->min_y = min_y;
+	this->max_x = max_x;
+	this->max_y = max_y;
 
-	this.width  = max_x - min_x;
-	this.height = max_y - min_y;
+	this->width  = max_x - min_x;
+	this->height = max_y - min_y;
 
 	p_center = new Point( min_x + (width/2), min_y + (height/2) );
 
@@ -162,34 +187,34 @@ bool Rectangle::check_intersection( Point *point ) {
 
 bool Rectangle::check_intersection( Rectangle *rectangle ) {
 
-	if( ( this.x_max > rectangle->x_min || rectangle->x_max > this.x_min ) &&
-            ( this.y_max > rectangle->y_min || rectangle->y_max > this.y_min ) ) {
+    if( ( max_x > rectangle->min_x && min_x < rectangle->max_x ) &&
+        ( max_y > rectangle->min_y && min_y < rectangle->max_y ) ) {
 		return true;
 	}
 	return false;
 
 }
 
-int Rectangle::get_hilbert() {
-	return p_center.get_hilbert();
+uint64_t Rectangle::get_hilbert() {
+	return p_center->get_hilbert();
 }
 
 bool Rectangle::operator>( Rectangle &rectangle ) {
-	if( this.p_center.get_hilbert() > rectangle.p_center.get_hilbert() ) {
+	if( get_hilbert() > rectangle.get_hilbert() ) {
 		return true;
 	}
 	return false;
 }
 
 bool Rectangle::operator<( Rectangle &rectangle ) {
-	if( this.p_center.get_hilbert() < rectangle.p_center.get_hilbert() ) {
+	if( get_hilbert() < rectangle.get_hilbert() ) {
 		return true;
 	}
 	return false;
 }
 
 bool Rectangle::operator==( Rectangle &rectangle ) {
-	if( this.p_center.get_hilbert() == rectangle.p_center.get_hilbert() ) {
+	if( get_hilbert() == rectangle.get_hilbert() ) {
 		return true;
 	}
 	return false;

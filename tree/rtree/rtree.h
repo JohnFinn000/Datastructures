@@ -15,80 +15,108 @@
  *
  * =====================================================================================
  */
+#ifndef _RTREE_H__
+#define _RTREE_H__
 
-#include <stdio>
+#include <stdio.h>
 #include "../../linkedlist/list.h"
 #include "../../dynamic_array/dynamic_array.hh"
 #include "shape.h"
 
 
-/*
-class Leaf : public Node {
-private:
-
-//constants
-	const int max_children = 3;
-	const int min_children = 0;
-
-//variables
-	bool is_leaf;
-	int num_children;
-	Node *parent;
-	Shape *shape[3];
-	Rectangle *bounds;
-
-public:
-
-};
-*/
-
 class RTree {
 private:
+
+    enum node_type {
+        node_root_t,
+        node_trunk_t,
+        node_branch_t,
+        node_leaf_t
+    };
 
     class Node {
     private:
 
     //constants
-        const int max_children = 3;
-        const int min_children = 0;
+        static const int max_children = 3;
+        static const int min_children = 0;
 
     //variables
-        bool is_leaf;
-        int num_children;
+        node_type type;
+        int  num_children;
         Node *parent;
-        Node *children[3];
+        Node *children[max_children];
         Rectangle *bounds;
+        bool bounds_current;
 
-        Shape *shape[3];
+	    void overflow( Node *node );
 
     public:
 
     //constructors
-        Node()
+        Node();
+
+    //inspectors
+        virtual Node *get_closest_child( uint64_t hilbert );
+        virtual void insert( Shape *shape );
+        void insert( Node *node ); // not implemented
+        Node **adopt_children( int &size );
+	    virtual List<Node*> *search( Rectangle *query_window );
+        virtual void print();
+
+        virtual node_type check_type();
+        virtual bool is_full();
+        virtual bool is_empty();
+        uint64_t get_hilbert();
+        
+    //mutators
+        Rectangle *get_bounds();
+        virtual void fit_bounds();
+
+        friend class RTree;
+        
+    };
+
+    class Leaf : public Node {
+    private:
+
+    //variables
+        Shape *shape;
+
+    public:
+
+    //constructors
+        Leaf();
+        Leaf( Shape *shape );
 
     //inspectors
         Node *get_closest_child( uint64_t hilbert );
-        void insert( Shape *shape ); // not implemented
-        void add( Node *node ); // not implemented
+        void insert( Shape *shape );
+        //void add( Node *node ); // not implemented
+	    List<Node*> *search( Rectangle *query_window );
+        void print();
 
-        bool is_leaf();
+        node_type check_type();
         bool is_full();
         bool is_empty();
         uint64_t get_hilbert();
         
     //mutators
-        void fit_bounds(); // not implemented
+        void fit_bounds();
+
+        friend class RTree;
         
     };
 
+    friend class Node;
+    friend class Leaf;
+
 //variables
-	Node *root;
+	Node *tree_root;
 
 //methods
-	Node *overflow( Node *node, Shape *shape );
-	void underflow();
-	void adjust_tree( Node *parent, Dynamic_array<Node> cousin_nodes ); // not implemented
-	RTree *choose_leaf( Shape *shape );
+	void adjust_tree( Node *parent, Dynamic_array<RTree::Node*> cousin_nodes ); // not implemented
+	Node *choose_leaf( Shape *shape );
 
 public:
 
@@ -96,7 +124,8 @@ public:
 	RTree(); 
 
 //inspectors
-	List *search( Rectangle *query_window );
+	List<Node*> *search( Rectangle *query_window );
+    void print_tree();
 
 //mutators
 	void insert( Shape *shape );
@@ -104,3 +133,6 @@ public:
 
 };
 
+extern RTree *t;
+
+#endif

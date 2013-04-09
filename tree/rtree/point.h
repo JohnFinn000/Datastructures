@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-	const int order = 7;
+	const int order = 8;
 	const uint64_t hilbert_table[][16] = { {
 	0, 1, 3, 2,
 	0, 3, 1, 2,

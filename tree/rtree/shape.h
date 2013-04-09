@@ -15,7 +15,10 @@
  *
  * =====================================================================================
  */
-#include <stdio>
+#include <stdlib.h>
+#include <stdint.h>
+#include "point.h"
+#include "../../dynamic_array/dynamic_array.hh"
 
 enum shape_names {
 	dot_e,
@@ -24,76 +27,80 @@ enum shape_names {
 	rectangle_e,
 };
 
+class Rectangle;
+
 class Shape {
 private:
 
+public:
 //variables
 	Rectangle *bounds;
 	bool bounds_current;
 
 	int num_points;
-	Point *list_point;
+	Dynamic_array<Point*> list_points;
 
 //methods
 	void fit_bounds();
 	
-public:
 
 //constructor
 	Shape();
 
 //inspectors
 	Rectangle *get_bounds();
-	int get_hilbert();
+	uint64_t get_hilbert();
 
-	void add_point();
+	Point **get_points( int &size );
+	void add_point( uint64_t x, uint64_t y );
+	void add_point( Point *p );
 
 	bool check_intersection( Point *point );
 	bool check_intersection( Shape *shape );
 	bool check_intersection( Rectangle *rectangle );
 
 //methods
-	void rotate();
-	void move();
+	void rotate( uint64_t x, uint64_t y );
+	void move(   uint64_t x, uint64_t y );
 
 //sugar
-	bool operator>( Shape &shape );
-	bool operator<( Shape &shape );
+	bool operator>(  Shape &shape );
+	bool operator<(  Shape &shape );
 	bool operator==( Shape &shape );
-	void operator=( Shape &shape );
+	void operator=(  Shape &shape );
 };
 
 
 class Rectangle {
 private:
 
-//variables
-	Point p_ul;
-	Point p_ur;
-	Point p_ll;
-	Point p_lr;
-	Point p_center;
-
-	int min_x, max_x;
-	int min_y, max_y;
-	int width;
-	int height;
-
 public:
+//variables
+	Point *p_ul;
+	Point *p_ur;
+	Point *p_ll;
+	Point *p_lr;
+	Point *p_center;
+
+	uint64_t min_x, max_x;
+	uint64_t min_y, max_y;
+	uint64_t width;
+	uint64_t height;
+
 
 //constructors
 	Rectangle();
-	Rectangle( int min_x, int min_y, int max_x, int max_y );
+	Rectangle( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
 
 //inspectors
 	bool check_intersection( Point *point );
 	bool check_intersection( Shape *shape );
 	bool check_intersection( Rectangle *rectangle );
 
-	int get_hilbert();
+	uint64_t get_hilbert();
 
 //mutators
-	void set( int min_x, int min_y, int max_x, int max_y );
+	void set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
 
 //sugar
 	bool operator>( Rectangle &rectangle );

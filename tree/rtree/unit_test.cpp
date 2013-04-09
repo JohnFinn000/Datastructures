@@ -16,33 +16,23 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-#include "point.h"
+#include "rtree.h"
+
+RTree *t;
 
 int main() {
 
-    Point pointa;
-    for( int i = 0; i <= 10; ++i ) {
-        printf("pointa) x: %lu, y: %lu, hilbert: %lu\n", pointa.get_x(), pointa.get_y(), pointa.get_hilbert() );
-        pointa.set_x( i );
+    t = new RTree();
 
+    Shape shape_list[200];
+    for( int i = 0; i < 200; ++i ) {
+        shape_list[i].add_point(5*i,i*10);
+        shape_list[i].add_point(5*(i+1),(i+1)*10);
+        shape_list[i].add_point(5*(i+1),(i+1)*10);
+        t->insert( (shape_list+i) );
     }
 
-    pointa.set_y( 1 );
-    for( int i = 0; i <= 10; ++i ) {
-        pointa.set_x( i );
-        printf("pointa) x: %lu, y: %lu, hilbert: %lu\n", pointa.get_x(), pointa.get_y(), pointa.get_hilbert() );
 
-    }
-
-    Point pointb( 5, 6 );
-    printf("\npointb) x: %lu, y: %lu, hilbert: %lu\n\n", pointb.get_x(), pointb.get_y(), pointb.get_hilbert() );
-
-    Point pointc( 0 );
-    for( int i = 0; i <= 25; ++i ) {
-    printf("pointc) x: %lu, y: %lu, hilbert: %lu\n", pointc.get_x(), pointc.get_y(), pointc.get_hilbert() );
-        pointc.set_hilbert( pointc.get_hilbert() + 1 );
-
-    }
-
+    t->print_tree();
 
 }

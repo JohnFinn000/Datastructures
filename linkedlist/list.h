@@ -15,6 +15,9 @@
  *
  * =====================================================================================
  */
+#ifndef _LIST_H__
+#define _LIST_H__
+#include <stdlib.h>
 
 template<class T>
 class List {
@@ -86,3 +89,6 @@ public:
 
 };
 
+#include "list.hxx"
+#include "list_iterator.hxx"
+#endif

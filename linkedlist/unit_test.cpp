@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "list.cpp" 
+#include "list.h" 
 
 void list_test();
 

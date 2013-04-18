@@ -18,33 +18,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include "../../lazy_eval/lazy_eval.h"
+#include "hilbert_tables.h"
 
-	const int order = 8;
-	const uint64_t hilbert_table[][16] = { {
-	0, 1, 3, 2,
-	0, 3, 1, 2,
-	2, 3, 1, 0,
-	2, 1, 3, 0,
-	}, {
-    1, 0, 3, 0,
-    0, 2, 1, 1,
-    2, 1, 2, 3,
-    3, 3, 0, 2,
-    } };
+const int maximum_order = 16; // should always be a multiple of 8
 
-	const uint64_t xy_table[] = {
-    0, 1, 3, 2,
-    0, 2, 3, 1,
-    3, 2, 0, 1,
-    3, 1, 0, 2,
-    };
-
-    const uint64_t state_table[] = {
-    1, 0, 0, 3,
-    0, 1, 1, 2,
-    3, 2, 2, 1,
-    2, 3, 3, 0,
-    };
+struct coords_pair {
+    uint64_t x;
+    uint64_t y;
+};
 
 class Point {
 private:
@@ -52,14 +34,47 @@ private:
 //constants
 
 //variables
-	uint64_t x;
-	uint64_t y;
-	uint64_t hilbert;
-	bool hilbert_current;
-	
-//methods
-	void point_to_hilbert( uint64_t x, uint64_t y, uint64_t &hilbert );
-	void hilbert_to_point( uint64_t hilbert, uint64_t &x, uint64_t &y );
+    
+    //uint64_t x;
+    //uint64_t y;
+	//uint64_t hilbert;
+	//bool hilbert_current;
+
+    template <class uint64_t>
+    class Lazy_hilbert;
+
+    template <class coords_pair>
+    class Lazy_coord : public Lazy<coords_pair> {
+        Point::Lazy_hilbert<uint64_t> *hilbert;
+        protected:
+        void evaluate() {
+            Point::hilbert_to_point( hilbert->get(), this->value.x, this->value.y );
+        }
+        public:
+        void init( Lazy_hilbert<uint64_t> *h ) {
+            hilbert = h;
+        }
+    };
+
+    template <class uint64_t>
+    class Lazy_hilbert : public Lazy<uint64_t> {
+        Point::Lazy_coord<coords_pair> *coords;
+        private:
+        void evaluate() {
+            coords_pair xy_coords = coords->get();
+            Point::point_to_hilbert( xy_coords.x, xy_coords.y, this->value );
+        }
+        public:
+        void init( Lazy_coord<coords_pair> *c ) {
+            coords = c;
+        }
+    };
+
+    //friend class Lazy_coord<coords_pair>;
+    //friend class Lazy_hilbert<uint64_t>;
+
+    Lazy_coord<coords_pair> coordinates;
+    Lazy_hilbert<uint64_t> hilbert;
 
 public:
 
@@ -79,11 +94,48 @@ public:
 	void set_xy( uint64_t x, uint64_t y );
 	void set_hilbert( uint64_t h );
 
+	static void point_to_hilbert( uint64_t x, uint64_t y, uint64_t &hilbert );
+	static void hilbert_to_point( uint64_t hilbert, uint64_t &x, uint64_t &y );
+
 //sugar
 	bool operator>( Point &p );
 	bool operator<( Point &p );
 	bool operator==( Point &p );
 	void operator=( Point &p );
+
+    bool operator==( Point param );
+    bool operator!=( Point param );
+    bool operator>(  Point param );
+    bool operator>=( Point param );
+    bool operator<(  Point param );
+    bool operator<=( Point param );
+
+    Point operator=(  Point param );
+    Point operator+=( Point param );
+    Point operator-=( Point param );
+    Point operator*=( Point param );
+    Point operator/=( Point param );
+    Point operator%=( Point param );
+
+    uint64_t operator=(  uint64_t param ); // set to hilbert value
+    uint64_t operator+=( uint64_t param );
+    uint64_t operator-=( uint64_t param );
+    uint64_t operator*=( uint64_t param );
+    uint64_t operator/=( uint64_t param );
+    uint64_t operator%=( uint64_t param );
+
+    Point operator+( Point param );
+    Point operator-( Point param );
+    Point operator*( Point param );
+    Point operator/( Point param );
+    Point operator%( Point param );
+
+    Point operator++( );     //prefix
+    Point operator++( int ); //suffix
+    Point operator--( );     //prefix
+    Point operator--( int ); //suffix
+
+    bool operator!();
 
 };
 

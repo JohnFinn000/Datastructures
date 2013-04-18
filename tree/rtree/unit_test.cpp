@@ -16,11 +16,12 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-#include "rtree.h"
-
+//#include "rtree.h"
+#include "utils.cpp"
+/*
 RTree *t;
 
-int main() {
+void verify_rtree() {
 
     t = new RTree();
 
@@ -32,7 +33,46 @@ int main() {
         t->insert( (shape_list+i) );
     }
 
-
-    t->print_tree();
+    //t->print_tree();
 
 }
+
+int verify_point() {
+
+    Point a;
+    a.set_xy( 0, 0 );
+    printf("%lu\n", a.get_hilbert() );
+
+    return 1;
+
+}
+*/
+int main() {
+    
+
+
+//    verify_rtree();
+
+   //Point::generate_hilbert_to_point_table();
+    
+    uint64_t x;
+    uint64_t y;
+    for( uint64_t h = 0; h < 100; ++h ) {
+        hilbert_to_point_base( h, x, y );
+        printf("%lu %lu\n", x, y );
+    }
+    
+/*
+    Point a;
+    for( uint64_t h = 0; h < 100; ++h ) {
+        a.set_hilbert( h );
+        printf("%lu %lu\n", a.get_x(), a.get_y() );
+    }
+*/
+
+}
+
+
+
+
+

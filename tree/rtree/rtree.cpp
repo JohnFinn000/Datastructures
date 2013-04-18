@@ -87,6 +87,7 @@ void RTree::Node::insert( Node *node ) {
 
     // insert the new shape in the proper place according to it's hilbert value
     int k;
+    node->get_bounds();
     for( k = 0; k < num_children; ++k ) { // find the proper place
         if( node->bounds > children[k]->bounds ) {
             break;
@@ -115,6 +116,10 @@ RTree::Node **RTree::Node::adopt_children( int &size ) {
     return children_list;
 }
 
+bool RTree::Node::compare( Node* a, Node *b ) {
+    return a->get_bounds()->get_hilbert() < b->get_bounds()->get_hilbert();
+}
+
 void RTree::Node::overflow( Node *new_node ) {
 
     Dynamic_array<RTree::Node*> cousin_nodes;
@@ -128,6 +133,8 @@ void RTree::Node::overflow( Node *new_node ) {
 
     // add in the shape causing the overflow
     cousin_nodes.add( new_node );
+
+    cousin_nodes.sort( compare );
 
     // check if there is enough room available to just shift the leaves around
     if( num_children * max_children < cousin_nodes.get_size() ) { // make more room
@@ -179,11 +186,11 @@ List<RTree::Node*> *RTree::Node::search( Rectangle *query_window ) {
 
 	switch( num_children ) {
 	case 3:
-		results->splice( children[2]->search( query_window ) ); 
+		results->splice( *children[2]->search( query_window ) ); 
 	case 2:
-		results->splice( children[1]->search( query_window ) );
+		results->splice( *children[1]->search( query_window ) );
 	case 1:
-		results->splice( children[0]->search( query_window ) );
+		results->splice( *children[0]->search( query_window ) );
 		break;
 	case 0:
         if( bounds->check_intersection( query_window ) ) {
@@ -199,11 +206,11 @@ void RTree::Node::print() {
 
     get_bounds();
     if( type == node_root_t ) {
-        printf("bounds( %lu, %lu, %lu, %lu ) {\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y );
+        printf("bounds( %lu, %lu, %lu, %lu, %lu ) {\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y, bounds->get_hilbert() );
     } else if( type == node_trunk_t ) {
-        printf("    bounds trunk( %lu, %lu, %lu, %lu ) {\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y );
+        printf("    bounds trunk( %lu, %lu, %lu, %lu, %lu ) {\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y, bounds->get_hilbert() );
     } else if( type == node_branch_t ) {
-        printf("        bounds branch( %lu, %lu, %lu, %lu ) {\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y );
+        printf("        bounds branch( %lu, %lu, %lu, %lu, %lu ) {\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y, bounds->get_hilbert() );
     }
 
     for( int i = 0; i < num_children; ++i ) {
@@ -260,7 +267,8 @@ void RTree::Node::fit_bounds() {
 
         bounds_iter->max_y > max_y ? max_y = bounds_iter->max_y : 
         bounds_iter->min_y < min_y ? min_y = bounds_iter->min_y : 0;
-    }   
+    }
+
     if( !bounds ) {
         bounds = new Rectangle( min_x, min_y, max_x, max_y );
     } else {
@@ -314,7 +322,7 @@ List<RTree::Node*> *RTree::Leaf::search( Rectangle *query_window ) {
 void RTree::Leaf::print() {
 
     get_bounds();
-    printf("            bounds leaf( %lu, %lu, %lu, %lu );\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y );
+    printf("            bounds leaf( %lu, %lu, %lu, %lu, %lu );\n", bounds->min_x, bounds->min_y, bounds->max_x, bounds->max_y, bounds->get_hilbert() );
 
 }
 

@@ -20,12 +20,12 @@
 
 #include <stdio.h>
 #include "../../linkedlist/list.h"
-#include "../../dynamic_array/dynamic_array.hh"
 #include "shape.h"
+#include "../../dynamic_array/dynamic_array.hh"
 
 
 class RTree {
-private:
+protected:
 
     enum node_type {
         node_root_t,
@@ -35,7 +35,7 @@ private:
     };
 
     class Node {
-    private:
+    public:
 
     //constants
         static const int max_children = 3;
@@ -68,6 +68,8 @@ private:
         virtual bool is_full();
         virtual bool is_empty();
         uint64_t get_hilbert();
+
+        static bool compare( Node *a, Node *b );
         
     //mutators
         Rectangle *get_bounds();
@@ -78,7 +80,7 @@ private:
     };
 
     class Leaf : public Node {
-    private:
+    public:
 
     //variables
         Shape *shape;

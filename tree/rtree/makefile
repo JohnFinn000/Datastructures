@@ -3,12 +3,12 @@ CC = g++
 CFLAGS = -g -Wall
 OBJDIR = obj 
 
-OBJECTS = point.o shape.o rtree.o unit_test.o
+OBJECTS = point.o shape.o rtree.o unit_test.o ../../lazy_eval/lazy_eval.o
 
 unit_test: $(OBJECTS)
 	$(CC) $(CFLAGS) -o unit_test $(OBJECTS)
 
-point.o: point.cpp point.h
+point.o: point.cpp point.h hilbert_tables.h
 	$(CC) $(CFLAGS) -c point.cpp
 
 shape.o: shape.cpp shape.h
@@ -16,6 +16,9 @@ shape.o: shape.cpp shape.h
 
 rtree.o: rtree.cpp rtree.h point.h shape.h
 	$(CC) $(CFLAGS) -c rtree.cpp
+
+../../lazy_eval/lazy_eval.o: ../../lazy_eval/lazy_eval.cpp ../../lazy_eval/lazy_eval.h ../../lazy_eval/lazy_eval.hxx
+	make lazy_eval.o -C ../../lazy_eval
 
 unit_test.o: unit_test.cpp
 	$(CC) $(CFLAGS) -c unit_test.cpp

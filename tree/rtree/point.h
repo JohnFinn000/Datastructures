@@ -15,11 +15,13 @@
  *
  * =====================================================================================
  */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include "../../lazy_eval/lazy_eval.h"
 #include "hilbert_tables.h"
+//#include "exceptions.h"
 
 const int maximum_order = 16; // should always be a multiple of 8
 
@@ -40,10 +42,10 @@ private:
 	//uint64_t hilbert;
 	//bool hilbert_current;
 
-    template <class uint64_t>
+    template <class T>
     class Lazy_hilbert;
 
-    template <class coords_pair>
+    template <class T>
     class Lazy_coord : public Lazy<coords_pair> {
         Point::Lazy_hilbert<uint64_t> *hilbert;
         protected:
@@ -56,7 +58,7 @@ private:
         }
     };
 
-    template <class uint64_t>
+    template <class T>
     class Lazy_hilbert : public Lazy<uint64_t> {
         Point::Lazy_coord<coords_pair> *coords;
         private:
@@ -75,6 +77,8 @@ private:
 
     Lazy_coord<coords_pair> coordinates;
     Lazy_hilbert<uint64_t> hilbert;
+
+    void initialize();
 
 public:
 

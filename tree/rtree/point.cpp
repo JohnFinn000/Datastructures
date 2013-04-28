@@ -21,36 +21,32 @@
 //constructor
 Point::Point() {
 
-    this->coordinates.init( &(this->hilbert) );
-    this->coordinates.add_dependant( &(this->hilbert) );
-    this->hilbert.init( &(this->coordinates) );
-    this->hilbert.add_dependant( &(this->coordinates) );
+    initialize();
 
 	set_xy( 0, 0 );
 }
 
 Point::Point( uint64_t x, uint64_t y ) {
 
-    this->coordinates.init( &(this->hilbert) );
-    this->coordinates.add_dependant( &(this->hilbert) );
-    this->hilbert.init( &(this->coordinates) );
-    this->hilbert.add_dependant( &(this->coordinates) );
+    initialize();
 
 	set_xy( x, y );
 }
 
 Point::Point( uint64_t hilbert ) {
 
-    this->coordinates.init( &(this->hilbert) );
-    this->coordinates.add_dependant( &(this->hilbert) );
-    this->hilbert.init( &(this->coordinates) );
-    this->hilbert.add_dependant( &(this->coordinates) );
+    initialize();
 
 	set_hilbert( hilbert );
 }
 
-//destructor
-//private
+void Point::initialize() {
+
+    this->coordinates.init( &(this->hilbert) );
+    this->coordinates.add_dependant( &(this->hilbert) );
+    this->hilbert.init( &(this->coordinates) );
+    this->hilbert.add_dependant( &(this->coordinates) );
+}
 
 void Point::point_to_hilbert( uint64_t x, uint64_t y, uint64_t &hilbert ) {
 	/*
@@ -153,32 +149,28 @@ uint64_t Point::get_y() {
 }
 
 uint64_t Point::get_hilbert() {
-    /*
-	if( this->hilbert_current == false ) {
-		point_to_hilbert( this->x, this->y, this->hilbert );
-		this->hilbert_current = true;
-	}*/
+
 	return hilbert.get();
 }
 
 
 void Point::set_x( uint64_t x ) {
 
-    set_xy( x, get_y() );
+    set_xy( x, get_y() ); // there may be faster ways of doing this
 }
 
 void Point::set_y( uint64_t y ) {
 
-    set_xy( get_x(), y );
+    set_xy( get_x(), y ); // there may be faster ways of doing this
 }
 
 void Point::set_xy( uint64_t x, uint64_t y ) {
+
     coords_pair temp;
     temp.x = x;
     temp.y = y;
     
     coordinates.set( temp );
-
 }
 
 void Point::set_hilbert( uint64_t h ) {

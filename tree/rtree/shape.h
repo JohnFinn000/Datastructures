@@ -31,11 +31,19 @@ enum shape_names {
 	rectangle_e,
 };
 
+enum intersection_type {
+	no_intersection_e,
+	partial_intersection_e,
+	complete_intersection_e,
+};
+
 class Bounding_box;
+class Rectangle;
 
 class Shape {
 
 protected:
+public:
 //variables
 	Dynamic_array<Point*> list_points;
 
@@ -46,17 +54,17 @@ public:
 	Shape();
 
 //inspectors
-	uint64_t get_hilbert();
-
 	Point **get_points( int &size );
 	virtual void add_point( uint64_t x, uint64_t y );
 	virtual void add_point( Point *p );
 
-	virtual bool check_intersection( Point *point );
-	virtual bool check_intersection( Shape *shape );
-	virtual bool check_intersection( Rectangle *rectangle );
+	void stretch( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
 
-    // full intersection = the shape encloses this shape in it's entirety
+	intersection_type check_intersection( Point *point );
+	intersection_type check_intersection( Shape *shape );
+	intersection_type check_intersection( Rectangle *rectangle );
+
+    // complete intersection = the shape encloses this shape in it's entirety
     // partial intersection = the shape is partially inside this shape
 
 //methods
@@ -64,78 +72,20 @@ public:
 	void move(   uint64_t x, uint64_t y );
 
 //sugar
-	bool operator>(  Shape &shape );
-	bool operator<(  Shape &shape );
-	bool operator==( Shape &shape );
 	void operator=(  Shape &shape );
 
 
 };
 
-class Bounded_shape {
-
-protected:
-//variables
-
-    template <class Bounding_box>
-    class Lazy_bounds : public Lazy<Bounding_box> {
-        Dynamic_array<Point*> *points;
-        protected:
-        void evaluate() {
-            uint64_t min_x;
-            uint64_t min_y;
-            uint64_t max_x;
-            uint64_t max_y;
-
-            Dynamic_array<Point*>::iterator *iter = points.begin();
-
-            min_x = max_x = iter->get()->get_x();
-            min_y = max_y = iter->get()->get_y();
-
-            for( ; !iter->end(); iter->next() ) { 
-                iter->get()->get_x() > max_x ? max_x = iter->get()->get_x() : 
-                iter->get()->get_x() < min_x ? min_x = iter->get()->get_x() : 0;
-
-                iter->get()->get_y() > max_y ? max_y = iter->get()->get_y() : 
-                iter->get()->get_y() < min_y ? min_y = iter->get()->get_y() : 0;
-            }   
-
-            value.set( min_x, min_y, max_x, max_y );
-
-        }
-        public:
-        void init( Dynamic_array<Point*> *p ) {
-            points = p;
-        }
-    }
-
-	Lazy_bounds<Bounding_box> bounds;
-
-public:
-//constructor
-	Bounded_shape();
-
-//inspectors
-	Bounding_box *get_bounds();
-	uint64_t get_hilbert();
-
-	void add_point( uint64_t x, uint64_t y );
-	void add_point( Point *p );
-
-	bool check_intersection( Point *point );
-	bool check_intersection( Shape *shape );
-	bool check_intersection( Rectangle *rectangle );
-
-//methods
-	void rotate( uint64_t x, uint64_t y );
-	void move(   uint64_t x, uint64_t y );
+class Rectangle : public Shape {
 
 
 };
 
-class Bounding_box : public Shape {
+class Bounding_box {
 
 protected:
+public:
 //variables
 	Point *p_ul;
 	Point *p_ur;
@@ -155,20 +105,24 @@ public:
 	Bounding_box( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
 
 //inspectors
-	//bool check_intersection( Point *point );
-	//bool check_intersection( Shape *shape );
-	//bool check_intersection( Bounding_box *bounding_box );
+	intersection_type check_intersection( Point *point );
+	intersection_type check_intersection( Shape *shape );
+	intersection_type check_intersection( Bounding_box *bounding_box );
 
 	uint64_t get_hilbert();
 
 //mutators
 	void set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
+	void get( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
+	void stretch( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
 
 //sugar
-	//bool operator>( Rectangle &rectangle );
-	//bool operator<( Rectangle &rectangle );
-	//bool operator==( Rectangle &rectangle );
-	//void operator=( Rectangle &rectangle ); // not implemented
+	bool operator>(  Bounding_box &rectangle );
+	bool operator>(  Bounding_box *rectangle );
+	bool operator<(  Bounding_box &rectangle );
+	bool operator<(  Bounding_box *rectangle );
+	bool operator==( Bounding_box &rectangle );
+	bool operator==( Bounding_box *rectangle );
 };
 
 #endif

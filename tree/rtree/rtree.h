@@ -19,13 +19,46 @@
 #define _RTREE_H__
 
 #include <stdio.h>
-#include "../../linkedlist/list.h"
 #include "shape.h"
+#include "../../linkedlist/list.h"
 #include "../../dynamic_array/dynamic_array.hh"
 
+/*
+ * =====================================================================================
+ *        Class:  RTree
+ *  Description:  This is a hilbert curve RTree implementation
+ *                  briefly what this does is it takes shapes and organizes them into
+ *                  groups that allow searches to be executed much more quickly
+ *                  than searching every single shape.
+ * =====================================================================================
+ */
 
 class RTree {
+public:
+
+    /* ====================  LIFECYCLE     ======================================= */
+    RTree();                             /* constructor */
+
+    /* ====================  ACCESSORS     ======================================= */
+	List<Shape*> *search( Rectangle *query_window );
+	List<Shape*> *search( Point     *query_point );
+
+    //Scope allows a search starting from somewhere lower in the tree than root
+    //Scope *retreive_scope( Rectangle *query_window );
+
+    void print_tree();
+
+    /* ====================  MUTATORS      ======================================= */
+	void insert( Shape *shape );
+	void insert( Shape *arr[], int size );
+	void insert( Dynamic_array<Shape*> arr );
+	void insert( List<Shape*> list );
+
+	void remove();
+	void clear();
 protected:
+public:
+    /* ====================  DATA MEMBERS  ======================================= */
 
     enum node_type {
         node_root_t,
@@ -34,107 +67,229 @@ protected:
         node_leaf_t
     };
 
+    // forward declarations
+    class Trunk;
+    class Leaf;
+    class Node;
+    class Branch;
+    class Root;
+
+    friend class Node;
+    friend class Trunk;
+    friend class Root;
+    friend class Branch;
+    friend class Leaf;
+
+    /*
+     * =====================================================================================
+     *        Class:  Node
+     *  Description:  Nodes are anything that exists in the RTree
+     * =====================================================================================
+     */
     class Node {
+    protected:
     public:
 
+    //variables
+        node_type type;
+        Trunk *parent;
+
+        template <class T>
+        class Lazy_bounds : public Lazy<Bounding_box*> {
+            RTree::Node *owner;
+            private: void evaluate();
+            public:  void init( RTree::Node *owner );
+        };
+
+        Lazy_bounds<Bounding_box*> bounds;
+
+        virtual void fit_bounds( Bounding_box &bounds ) = 0;
+
+        template <class T>
+        friend class Lazy_bounds;
+
+    public:
+    //constructors
+        Node();
+        Node( Trunk *parent );
+
+    //inspectors
+	    virtual List<Shape*> *search( Rectangle *query_window ) = 0;
+	    virtual List<Shape*> *search( Point     *query_point  ) = 0;
+
+        virtual void print( int indent = 0 );
+
+        node_type check_type();
+        virtual uint64_t get_hilbert();
+        Bounding_box *get_bounds();
+
+        static bool less_than(    Node *a, Node *b );
+        static bool greater_than( Node *a, Node *b );
+        
+    //mutators
+        virtual Node **adopt_children( int &size ) = 0;
+        void adopt( Trunk *parent );
+
+        virtual void insert( Leaf  *leaf )     = 0;
+        virtual void insert( Trunk *new_node ) = 0;
+        virtual void insert( Node  *new_node ) = 0;
+
+        friend class RTree;
+        
+    }; /* -----  end of class Node  ----- */
+
+
+    template <class T>
+    friend class Node::Lazy_bounds;
+
+    /*
+     * =====================================================================================
+     *        Class:  Trunk
+     *  Description:  Trunk is anything that has children. Which is just all nodes
+     *                  excluding leaf nodes.
+     * =====================================================================================
+     */
+    class Trunk : public Node {
+    protected:
+    public:
     //constants
         static const int max_children = 3;
         static const int min_children = 0;
 
     //variables
-        node_type type;
         int  num_children;
-        Node *parent;
         Node *children[max_children];
-        Rectangle *bounds;
-        bool bounds_current;
 
-	    void overflow( Node *node );
+    //methods
+        void fit_bounds( Bounding_box &bounds );
+	    virtual void overflow( Node *node );
 
     public:
-
     //constructors
-        Node();
+        Trunk();
+        Trunk( Trunk *parent );
 
     //inspectors
-        virtual Node *get_closest_child( uint64_t hilbert );
-        virtual void insert( Shape *shape );
-        void insert( Node *node ); // not implemented
-        Node **adopt_children( int &size );
-	    virtual List<Node*> *search( Rectangle *query_window );
-        virtual void print();
+        virtual uint64_t get_hilbert();
+        void print( int indent = 0 );
 
-        virtual node_type check_type();
+	    virtual List<Shape*> *search( Rectangle *query_window );
+	    virtual List<Shape*> *search( Point     *query_point );
+
         virtual bool is_full();
         virtual bool is_empty();
-        uint64_t get_hilbert();
 
-        static bool compare( Node *a, Node *b );
-        
     //mutators
-        Rectangle *get_bounds();
-        virtual void fit_bounds();
+        Node **adopt_children( int &size );
+
+        virtual void insert( Leaf  *leaf );
+        virtual void insert( Trunk *new_node );
+        virtual void insert( Node  *new_node );
 
         friend class RTree;
-        
-    };
+    }; /* -----  end of class Trunk  ----- */
 
-    class Leaf : public Node {
+
+
+    /*
+     * =====================================================================================
+     *        Class:  Root
+     *  Description:  Root is a node with no parent's it operates nearly identically to 
+     *                  Trunk nodes except it splits itself instead of attempting to
+     *                  overflow into non-existant sibling nodes
+     * =====================================================================================
+     */
+    class Root : public Trunk {
     public:
+    //constructors
+        Root();
 
+    //mutators
+        void insert( Leaf  *leaf );
+        void insert( Trunk *node );
+
+        friend class RTree;
+    }; /* -----  end of class Root  ----- */
+
+
+
+    /*
+     * =====================================================================================
+     *        Class:  Branch
+     *  Description:  Branches are nearly identical to Trunk except instead of passing
+     *                  Leaf insertions onto their children they will insert them into
+     *                  their children list.
+     *                It is invalid to insert a Trunk node into a Branch node because
+     *                  a Branch's children can only be leaves.
+     * =====================================================================================
+     */
+    class Branch : public Trunk {
+    protected:
+    public:
+    //methods
+        void overflow( Node *node );
+    public:
+    //constructors
+        Branch();
+
+    //mutators
+        void insert( Leaf  *leaf );
+        void insert( Trunk *node );
+
+        friend class RTree;
+    }; /* -----  end of class Branch  ----- */
+
+
+    
+    /*
+     * =====================================================================================
+     *        Class:  Leaf
+     *  Description:  Leaves hold the bounds for their shape and a pointer to the shape
+     *                  Many of the methods it inherits from Node are invalid to call
+     *                  this is something that should most likely be fixed but since only
+     *                  RTree can directly interact with Nodes rearranging the inheritance
+     *                  heiarchy won't be visible outside of RTree and I can put it off
+     *                  for a little while.
+     * =====================================================================================
+     */
+    class Leaf : public Node {
+    protected:
+    public:
     //variables
         Shape *shape;
 
+    //methods
+        void fit_bounds( Bounding_box &bounds );
     public:
-
     //constructors
         Leaf();
         Leaf( Shape *shape );
 
     //inspectors
-        Node *get_closest_child( uint64_t hilbert );
-        void insert( Shape *shape );
-        //void add( Node *node ); // not implemented
-	    List<Node*> *search( Rectangle *query_window );
-        void print();
+	    List<Shape*> *search( Rectangle *query_window );
+	    List<Shape*> *search( Point     *query_point );
 
-        node_type check_type();
         bool is_full();
         bool is_empty();
-        uint64_t get_hilbert();
         
     //mutators
-        void fit_bounds();
+        void set( Shape *shape );
+        
+        Node **adopt_children( int &size );
+
+    //illegal methods
+        void insert( Leaf  *leaf );     // this is illegal
+        void insert( Trunk *new_node ); // this is illegal
+        void insert( Node  *new_node ); // this is illegal
 
         friend class RTree;
-        
-    };
+    }; /* -----  end of class Leaf  ----- */
 
-    friend class Node;
-    friend class Leaf;
+
 
 //variables
-	Node *tree_root;
+	Root *tree_root;
 
-//methods
-	void adjust_tree( Node *parent, Dynamic_array<RTree::Node*> cousin_nodes ); // not implemented
-	Node *choose_leaf( Shape *shape );
-
-public:
-
-//constructors
-	RTree(); 
-
-//inspectors
-	List<Node*> *search( Rectangle *query_window );
-    void print_tree();
-
-//mutators
-	void insert( Shape *shape );
-	void delete_node();
-
-};
-
-extern RTree *t;
+}; /* -----  end of class RTree  ----- */
 
 #endif

@@ -26,7 +26,7 @@ Shape::Shape() {
 
 Point **Shape::get_points( int &size ) {
 
-
+    
 }
 
 void Shape::add_point( uint64_t x, uint64_t y ) {
@@ -58,8 +58,57 @@ void Shape::stretch( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t
     }
 }
 
+
 intersection_type Shape::check_intersection( Point *point ) {
-    return no_intersection_e;
+
+    Dynamic_array<Point*>::iterator *iter = list_points.begin();
+    uint64_t p_x = point->get_x();
+    uint64_t p_y = point->get_y();
+
+    uint64_t a_x;
+    uint64_t a_y;
+
+    uint64_t b_x;
+    uint64_t b_y;
+
+    int intersection_count = 0;
+
+    a_x = iter->get()->get_x();
+    a_y = iter->get()->get_y();
+    for( ; !iter->end(); iter->next() ) {
+        
+        a_x = b_x;
+        a_y = b_y;
+        b_x = iter->get()->get_x();
+        b_y = iter->get()->get_y();
+
+
+        if( p_y > a_y && p_y < b_y ) {
+            // if b_x and a_x are positive or
+            // they are kitty corner to each other
+            //  and pass through the positive x axis
+            if( a_x > p_x ) {
+                if( b_x > p_x ) {
+                    ++intersection_count;
+                } else {
+                    
+                    // increase intersection count if the slope is correct
+                }
+            } else {
+                if( b_x > p_x ) {
+                    
+                    // increase intersection count if the slope is correct
+                }
+            }
+        }
+            
+    }
+
+    if( intersection_count & 1 ) { // if it's odd it's inside
+        return partial_intersection_e;
+    } else { // if it's even it's outside
+        return no_intersection_e;
+    }
 }
 
 intersection_type Shape::check_intersection( Rectangle *rectangle ) {
@@ -67,6 +116,15 @@ intersection_type Shape::check_intersection( Rectangle *rectangle ) {
 }
 
 intersection_type Shape::check_intersection( Shape *shape ) {
+    
+    // Shape intersections are a little more complicated than this
+    // TODO better shape intersection testing
+    Dynamic_array<Point*>::iterator *iter = list_points.begin();
+    for( ; !iter->end(); iter->next() ) {
+        if( shape->check_intersection( iter->get() ) == partial_intersection_e ) {
+            return partial_intersection_e;
+        }
+    }
     return no_intersection_e;
 }
 
@@ -87,22 +145,26 @@ void Shape::operator=( Shape &shape ) {
 
 }
 
-//Rectangle
-//constructor
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Bounding_box
+ *      Method:  Bounding_box
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
 Bounding_box::Bounding_box() {
 
 	set( 0, 0, 0, 0 );
-}
+}  /* -----  end of method Bounding_box::Bounding_box  (constructor)  ----- */
+
 
 Bounding_box::Bounding_box( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y ) {
 
 	set( min_x, min_y, max_x, max_y );
-}
+}  /* -----  end of method Bounding_box::Bounding_box  (constructor)  ----- */
 
-//destructor
-//private
-
-//public
 
 intersection_type Bounding_box::check_intersection( Point *point ) {
 

@@ -18,24 +18,55 @@
  */
 #include "rtree.h"
 
-//RTree
-//constructor
-RTree::RTree() {
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree
+ *      Method:  RTree
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
+RTree::RTree ()
+{
     tree_root = new Root();
-}
+}  /* -----  end of method RTree::RTree  (constructor)  ----- */
 
-//public
-
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree
+ *      Method:  RTree :: search
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
 List<Shape*> *RTree::search( Rectangle *query_window ) {
     return tree_root->search( query_window );   
 }
 
+List<Shape*> *RTree::search( Point *query_point ) {
+    return tree_root->search( query_point );   
+}
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree
+ *      Method:  RTree :: print_tree
+ * Description:  recursively prints the tree from root
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::print_tree() {
 
     tree_root->print();
 }
 
-// puts a shape in the rtree
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree
+ *      Method:  RTree :: insert
+ * Description:  wraps the specified shape in a leaf node and inserts the leaf
+ *                  into the tree.
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::insert( Shape *shape ) {
     
     try {
@@ -61,12 +92,30 @@ void RTree::insert( List<Shape*> list ) {
     // sort the list
 }
 
-void RTree::remove() {
-    
-    
 
+/* TODO implement remove
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree
+ *      Method:  RTree :: remove
+ * Description:  removes the specified shape
+ *--------------------------------------------------------------------------------------
+ */
+void RTree::remove() {
 
 }
+
+/* TODO implement clear
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree
+ *      Method:  RTree :: clear
+ * Description:  clears the RTree of all shapes
+ *--------------------------------------------------------------------------------------
+ */
+void RTree::clear() {
+
+}
+
+
 
 
 

@@ -40,23 +40,20 @@ enum intersection_type {
 class Bounding_box;
 class Rectangle;
 
+
+/*
+ * =====================================================================================
+ *        Class:  Shape
+ *  Description:  
+ * =====================================================================================
+ */
 class Shape {
-
-protected:
 public:
-//variables
-	Dynamic_array<Point*> list_points;
+    /* ====================  LIFECYCLE     ======================================= */
+    Shape();                             /* constructor */
 
-//methods
-	
-public:
-//constructor
-	Shape();
-
-//inspectors
+    /* ====================  ACCESSORS     ======================================= */
 	Point **get_points( int &size );
-	virtual void add_point( uint64_t x, uint64_t y );
-	virtual void add_point( Point *p );
 
 	void stretch( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
 
@@ -67,26 +64,65 @@ public:
     // complete intersection = the shape encloses this shape in it's entirety
     // partial intersection = the shape is partially inside this shape
 
-//methods
+    /* ====================  MUTATORS      ======================================= */
+	virtual void add_point( uint64_t x, uint64_t y );
+	virtual void add_point( Point *p );
+
+    //methods
 	void rotate( uint64_t x, uint64_t y );
 	void move(   uint64_t x, uint64_t y );
 
-//sugar
+    /* ====================  OPERATORS     ======================================= */
 	void operator=(  Shape &shape );
 
+protected:
+public:
+    /* ====================  DATA MEMBERS  ======================================= */
+	Dynamic_array<Point*> list_points;
 
-};
+}; /* -----  end of class Shape  ----- */
 
 class Rectangle : public Shape {
 
 
 };
 
+
+/*
+ * =====================================================================================
+ *        Class:  Bounding_box
+ *  Description:  A bounding box is just an axis aligned rectangle
+ * =====================================================================================
+ */
 class Bounding_box {
+public:
+    /* ====================  LIFECYCLE     ======================================= */
+	Bounding_box();                             /* constructor */
+	Bounding_box( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
+
+    /* ====================  ACCESSORS     ======================================= */
+	intersection_type check_intersection( Point *point );
+	intersection_type check_intersection( Shape *shape );
+	intersection_type check_intersection( Bounding_box *bounding_box );
+
+	void get( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
+	void stretch( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
+	uint64_t get_hilbert();
+
+    /* ====================  MUTATORS      ======================================= */
+	void set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
+
+    /* ====================  OPERATORS     ======================================= */
+	bool operator>(  Bounding_box &rectangle );
+	bool operator>(  Bounding_box *rectangle );
+	bool operator<(  Bounding_box &rectangle );
+	bool operator<(  Bounding_box *rectangle );
+	bool operator==( Bounding_box &rectangle );
+	bool operator==( Bounding_box *rectangle );
 
 protected:
 public:
-//variables
+    /* ====================  DATA MEMBERS  ======================================= */
 	Point *p_ul;
 	Point *p_ur;
 	Point *p_ll;
@@ -99,31 +135,7 @@ public:
 	uint64_t height;
 
 
-public:
-//constructors
-	Bounding_box();
-	Bounding_box( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
-
-//inspectors
-	intersection_type check_intersection( Point *point );
-	intersection_type check_intersection( Shape *shape );
-	intersection_type check_intersection( Bounding_box *bounding_box );
-
-	uint64_t get_hilbert();
-
-//mutators
-	void set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
-	void get( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
-	void stretch( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y );
-
-//sugar
-	bool operator>(  Bounding_box &rectangle );
-	bool operator>(  Bounding_box *rectangle );
-	bool operator<(  Bounding_box &rectangle );
-	bool operator<(  Bounding_box *rectangle );
-	bool operator==( Bounding_box &rectangle );
-	bool operator==( Bounding_box *rectangle );
-};
+}; /* -----  end of class Bounding_box  ----- */
 
 #endif
 

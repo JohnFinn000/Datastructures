@@ -3,7 +3,7 @@
  *
  *       Filename:  point.cpp
  *
- *    Description:  
+ *    Description:  The implementation of the point class
  *
  *        Version:  1.0
  *        Created:  03/21/2013 07:21:41 PM
@@ -17,35 +17,129 @@
  */
 #include "point.h"
 
-//Point
-//constructor
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  Point
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
 Point::Point() {
 
     initialize();
-
 	set_xy( 0, 0 );
-}
+}  /* -----  end of method Point::Point  (constructor)  ----- */
 
 Point::Point( uint64_t x, uint64_t y ) {
 
     initialize();
-
 	set_xy( x, y );
-}
+}  /* -----  end of method Point::Point  (constructor)  ----- */
 
 Point::Point( uint64_t hilbert ) {
 
     initialize();
-
 	set_hilbert( hilbert );
+}  /* -----  end of method Point::Point  (constructor)  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  get_x
+ *--------------------------------------------------------------------------------------
+ */
+uint64_t Point::get_x (  ) {
+	return coordinates.get().x;
+}		/* -----  end of method Point::get_x  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  get_y
+ *--------------------------------------------------------------------------------------
+ */
+uint64_t Point::get_y (  ) {
+	return coordinates.get().y;
+}		/* -----  end of method Point::get_y  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  get_hilbert
+ *--------------------------------------------------------------------------------------
+ */
+uint64_t Point::get_hilbert (  ) {
+	return hilbert.get();
+}		/* -----  end of method Point::get_hilbert  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  set_x
+ *--------------------------------------------------------------------------------------
+ */
+void Point::set_x ( uint64_t value ) {
+    set_xy( value, get_y() ); // there may be faster ways of doing this
+}		/* -----  end of method Point::set_x  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  set_y
+ *--------------------------------------------------------------------------------------
+ */
+void Point::set_y ( uint64_t value ) {
+    set_xy( get_x(), value ); // there may be faster ways of doing this
+}		/* -----  end of method Point::set_y  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Point
+ *      Method:  set_hilbert
+ *--------------------------------------------------------------------------------------
+ */
+inline void Point::set_hilbert ( uint64_t value ) {
+	this->hilbert.set( value );
+}		/* -----  end of method Point::set_hilbert  ----- */
+
+
+void Point::set_xy( uint64_t x, uint64_t y ) {
+
+    coords_pair temp;
+    temp.x = x;
+    temp.y = y;
+    
+    coordinates.set( temp );
 }
 
-void Point::initialize() {
 
-    this->coordinates.init( &(this->hilbert) );
-    this->coordinates.add_dependant( &(this->hilbert) );
-    this->hilbert.init( &(this->coordinates) );
-    this->hilbert.add_dependant( &(this->coordinates) );
+bool Point::operator>( Point &p ) {
+
+	if( get_hilbert() > p.get_hilbert() ) {
+		return true;
+	}
+	return false;
+}
+
+bool Point::operator<( Point &p ) {
+
+	if( get_hilbert() < p.get_hilbert() ) {
+		return true;
+	}
+	return false;
+}
+
+bool Point::operator==( Point &p ) {
+
+	if( get_hilbert() == p.get_hilbert() ) {
+		return true;
+	}
+	return false;
+}
+
+void Point::operator=( Point &p ) {
+
+	set_xy( p.get_x(), p.get_y() );
 }
 
 void Point::point_to_hilbert( uint64_t x, uint64_t y, uint64_t &hilbert ) {
@@ -137,74 +231,11 @@ code    |0 0|0 0 0 0 0 0 0 0|
 */
 }
 
-//public
-uint64_t Point::get_x() {
+void Point::initialize() {
 
-	return coordinates.get().x;
-}
-
-uint64_t Point::get_y() {
-
-	return coordinates.get().y;
-}
-
-uint64_t Point::get_hilbert() {
-
-	return hilbert.get();
-}
-
-
-void Point::set_x( uint64_t x ) {
-
-    set_xy( x, get_y() ); // there may be faster ways of doing this
-}
-
-void Point::set_y( uint64_t y ) {
-
-    set_xy( get_x(), y ); // there may be faster ways of doing this
-}
-
-void Point::set_xy( uint64_t x, uint64_t y ) {
-
-    coords_pair temp;
-    temp.x = x;
-    temp.y = y;
-    
-    coordinates.set( temp );
-}
-
-void Point::set_hilbert( uint64_t h ) {
-
-	this->hilbert.set( h );
-}
-
-
-bool Point::operator>( Point &p ) {
-
-	if( get_hilbert() > p.get_hilbert() ) {
-		return true;
-	}
-	return false;
-}
-
-bool Point::operator<( Point &p ) {
-
-	if( get_hilbert() < p.get_hilbert() ) {
-		return true;
-	}
-	return false;
-}
-
-bool Point::operator==( Point &p ) {
-
-	if( get_hilbert() == p.get_hilbert() ) {
-		return true;
-	}
-	return false;
-}
-
-void Point::operator=( Point &p ) {
-
-	set_xy( p.get_x(), p.get_y() );
+    this->coordinates.init( &(this->hilbert) );
+    this->coordinates.add_dependant( &(this->hilbert) );
+    this->hilbert.init( &(this->coordinates) );
+    this->hilbert.add_dependant( &(this->coordinates) );
 }
 

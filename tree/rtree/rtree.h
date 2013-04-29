@@ -90,7 +90,7 @@ public:
     protected:
     public:
 
-    //variables
+        //variables
         node_type type;
         Trunk *parent;
 
@@ -99,21 +99,23 @@ public:
             RTree::Node *owner;
             private: void evaluate();
             public:  void init( RTree::Node *owner );
-        };
+        }; /* -----  end of class Lazy_bounds  ----- */
 
         Lazy_bounds<Bounding_box*> bounds;
-
-        virtual void fit_bounds( Bounding_box &bounds ) = 0;
 
         template <class T>
         friend class Lazy_bounds;
 
+        //methods
+        virtual void fit_bounds( Bounding_box &bounds ) = 0;
+        virtual void consolidate();
+
     public:
-    //constructors
+        //constructors
         Node();
         Node( Trunk *parent );
 
-    //inspectors
+        //inspectors
 	    virtual List<Shape*> *search( Rectangle *query_window ) = 0;
 	    virtual List<Shape*> *search( Point     *query_point  ) = 0;
 
@@ -126,7 +128,7 @@ public:
         static bool less_than(    Node *a, Node *b );
         static bool greater_than( Node *a, Node *b );
         
-    //mutators
+        //mutators
         virtual Node **adopt_children( int &size ) = 0;
         void adopt( Trunk *parent );
 
@@ -152,24 +154,25 @@ public:
     class Trunk : public Node {
     protected:
     public:
-    //constants
+        //constants
         static const int max_children = 3;
-        static const int min_children = 0;
+        static const int min_children = 2; // min_children should be 1 for branch
 
-    //variables
+        //variables
         int  num_children;
         Node *children[max_children];
 
-    //methods
+        //methods
         void fit_bounds( Bounding_box &bounds );
 	    virtual void overflow( Node *node );
+        virtual void consolidate();
 
     public:
-    //constructors
+        //constructors
         Trunk();
         Trunk( Trunk *parent );
 
-    //inspectors
+        //inspectors
         virtual uint64_t get_hilbert();
         void print( int indent = 0 );
 
@@ -179,7 +182,7 @@ public:
         virtual bool is_full();
         virtual bool is_empty();
 
-    //mutators
+        //mutators
         Node **adopt_children( int &size );
 
         virtual void insert( Leaf  *leaf );
@@ -201,10 +204,10 @@ public:
      */
     class Root : public Trunk {
     public:
-    //constructors
+        //constructors
         Root();
 
-    //mutators
+        //mutators
         void insert( Leaf  *leaf );
         void insert( Trunk *node );
 
@@ -226,13 +229,15 @@ public:
     class Branch : public Trunk {
     protected:
     public:
-    //methods
+        //methods
         void overflow( Node *node );
+        void consolidate();
+
     public:
-    //constructors
+        //constructors
         Branch();
 
-    //mutators
+        //mutators
         void insert( Leaf  *leaf );
         void insert( Trunk *node );
 
@@ -255,29 +260,29 @@ public:
     class Leaf : public Node {
     protected:
     public:
-    //variables
+        //variables
         Shape *shape;
 
-    //methods
+        //methods
         void fit_bounds( Bounding_box &bounds );
     public:
-    //constructors
+        //constructors
         Leaf();
         Leaf( Shape *shape );
 
-    //inspectors
+        //inspectors
 	    List<Shape*> *search( Rectangle *query_window );
 	    List<Shape*> *search( Point     *query_point );
 
         bool is_full();
         bool is_empty();
         
-    //mutators
+        //mutators
         void set( Shape *shape );
         
         Node **adopt_children( int &size );
 
-    //illegal methods
+        //illegal methods
         void insert( Leaf  *leaf );     // this is illegal
         void insert( Trunk *new_node ); // this is illegal
         void insert( Node  *new_node ); // this is illegal
@@ -287,7 +292,7 @@ public:
 
 
 
-//variables
+    //variables
 	Root *tree_root;
 
 }; /* -----  end of class RTree  ----- */

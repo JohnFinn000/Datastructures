@@ -3,7 +3,7 @@
  *
  *       Filename:  rtree_node.cpp
  *
- *    Description:  rtree node implementation
+ *    Description:  rtree node implementations
  *
  *        Version:  1.0
  *        Created:  04/18/2013 07:14:54 PM
@@ -39,18 +39,26 @@ void RTree::Node::Lazy_bounds<Bounding_box*>::init( RTree::Node *o ) {
 // it would be good to look into a better inheritance heiarchy to remedy this
 // however any changes should make the heirchy simpler I don't want to add another type
 // of node it's already complicated enough as is.
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Node
+ *      Method:  Node
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
 RTree::Node::Node() {
 
 	parent = NULL;
     this->bounds.init( this );
-}
+}  /* -----  end of method RTree::Node::Node  (constructor)  ----- */
 
 RTree::Node::Node( RTree::Trunk *parent ) {
 
 	this->parent = parent;
     this->bounds.init( this );
     parent->bounds.add_dependant( &(this->bounds) );
-}
+}  /* -----  end of method RTree::Node::Node  (constructor)  ----- */
 
 void RTree::Node::print( int indent ) {
 
@@ -69,14 +77,19 @@ uint64_t RTree::Node::get_hilbert() {
     return bounds.get()->get_hilbert();	
 }
 
-bool RTree::Node::greater_than( Node* a, Node *b ) {
+Bounding_box *RTree::Node::get_bounds() {
 
-    return a->get_hilbert() > b->get_hilbert();
+    return bounds.get();
 }
 
 bool RTree::Node::less_than( Node* a, Node *b ) {
 
     return a->get_hilbert() < b->get_hilbert();
+}
+
+bool RTree::Node::greater_than( Node* a, Node *b ) {
+
+    return a->get_hilbert() > b->get_hilbert();
 }
 
 void RTree::Node::adopt( RTree::Trunk *parent ) {
@@ -85,14 +98,17 @@ void RTree::Node::adopt( RTree::Trunk *parent ) {
 
 }
 
-Bounding_box *RTree::Node::get_bounds() {
-
-    return bounds.get();
+void RTree::Node::consolidate( ) {
 }
 
 
-
-// Trunk
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Trunk
+ *      Method:  Trunk
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
 
 RTree::Trunk::Trunk() {
 
@@ -105,7 +121,7 @@ RTree::Trunk::Trunk() {
         children[i] = NULL;
     }   
 
-}
+}  /* -----  end of method RTree::Trunk::Trunk  (constructor)  ----- */
 
 RTree::Trunk::Trunk( RTree::Trunk *parent ) {
 
@@ -119,8 +135,21 @@ RTree::Trunk::Trunk( RTree::Trunk *parent ) {
         children[i] = NULL;
     }   
 
-}
+}  /* -----  end of method RTree::Trunk::Trunk  (constructor)  ----- */
 
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Trunk
+ *      Method:  RTree::Trunk :: fit_bounds
+ * Description:  This is called by lazy_bounds when the bounds need to be evaluated
+ *                  it finds the minimum y, maximum y, minimum x, and maximum x
+ *                  of it's children and those are set to be the bounds of this node
+ *
+ *        Note:  This should never be called except by lazy_bounds
+ *
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::Trunk::fit_bounds( Bounding_box &bounds ) {
     uint64_t min_x; // only actually needs to check new points
     uint64_t min_y;
@@ -141,10 +170,18 @@ void RTree::Trunk::fit_bounds( Bounding_box &bounds ) {
     }
 }
 
-// when a node has too many children it calls it call's it's parent's overflow function
-// the parent then redistributes it's grand children amoungst it's children and if there are
-// too many grandchildren it spawns a new child and inserts it into itself
-// if the parent has too many children it will then propogate the overflow
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Trunk
+ *      Method:  RTree::Trunk :: overflow
+ * Description:  
+ *     when a node has too many children it calls it call's it's parent's overflow function
+ *     the parent then redistributes it's grand children amoungst it's children and if there are
+ *     too many grandchildren it spawns a new child and inserts it into itself
+ *     if the parent has too many children it will then propogate the overflow
+ *
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::Trunk::overflow( Node *new_node ) {
     Dynamic_array<RTree::Node*> cousin_nodes;
 
@@ -161,11 +198,11 @@ void RTree::Trunk::overflow( Node *new_node ) {
     // sort them according to their hilbert values
     cousin_nodes.sort( less_than );
 
+    int size = cousin_nodes.get_size();
 
     // check if there is enough room available to just shift the leaves around
-    if( num_children * max_children < cousin_nodes.get_size() ) { // if there is not then make more room
+    if( num_children * max_children < size ) { // if there is not then make more room
         Node *new_child;
-        // TODO something is wrong here fixing it would be good
         switch( children[0]->check_type() ) {
         case node_leaf_t:
             new_child = new Branch();
@@ -177,12 +214,10 @@ void RTree::Trunk::overflow( Node *new_node ) {
             new_child = new Trunk();
             break;
         default:
-            printf("EXCEPTION\n\n\n");
-            return; // TODO should be an exception
+            return;
         }
 
         // add the leaves all into the children and the new node
-        int size = cousin_nodes.get_size();
         int leaves_per;
         if( size % (num_children+1) == 0 ) {            // if the nodes can now be split in evenly ex) 9 amoungst 3
             leaves_per = (size / (num_children + 1));   // then do so
@@ -190,7 +225,7 @@ void RTree::Trunk::overflow( Node *new_node ) {
             leaves_per = (size / (num_children+1)) + 1; // ex) 8 amoungst 3 results in 3 leaves per for the first 2
         }                                               //     and 2 for the newly added child
 
-        //leaves_per = (size + (num_children)) / (num_children+1); // this might be a better alternative
+        //leaves_per = (size + (num_children)) / (num_children+1); // TODO this might be a better alternative
 
         int i = 0;
         int k = 0;
@@ -214,7 +249,6 @@ void RTree::Trunk::overflow( Node *new_node ) {
 
         // no split was needed so just redistribute the leaves
         // add the leaves all into the children
-        int size = cousin_nodes.get_size();
         //int leaves_per = size / num_children;
         int leaves_per = (size + (num_children-1)) / (num_children); // this might be a better alternative
         int i = 0;
@@ -227,9 +261,57 @@ void RTree::Trunk::overflow( Node *new_node ) {
         }
 
         bounds.invalidate();
+
+        for( int i = 0; i < num_children; ++i ) {
+            children[i]->consolidate();
+        }
 	}
+}		/* -----  end of method RTree::Trunk::overflow  ----- */
+
+
+void RTree::Trunk::consolidate( ) {
+    for( int i = 0; i < num_children; ++i ) {
+        children[i]->consolidate();
+    }
+
+    Dynamic_array<RTree::Node*> cousin_nodes;
+
+    // gather up a list of all the grandchildren
+    int children_list_size;
+    for( int i = 0; i < num_children; ++i ) {
+        Node **adopted_children = children[i]->adopt_children( children_list_size );
+        cousin_nodes.add( adopted_children, children_list_size ); 
+    };
+
+    int size = cousin_nodes.get_size();
+
+    // set the number of children to the actual number we need
+    num_children = (size + (max_children-1)) / max_children;
+
+    // place the grand children into the children
+    
+    //int leaves_per = size / num_children;
+    int leaves_per = (size + (num_children-1)) / (num_children); // this might be a better alternative
+    int i = 0;
+    for( int k = 0; k < size; ) {
+        children[i]->insert( cousin_nodes[k] );
+        ++k;
+        if( k % leaves_per == 0 ) {
+            ++i;
+        }
+    }
 }
 
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Trunk
+ *      Method:  RTree::Trunk :: get_hilbert
+ * Description:  This returns the largest hilbert value from amoungst it's children
+ *                  if there are no children 0 is returned.
+ *
+ *--------------------------------------------------------------------------------------
+ */
 uint64_t RTree::Trunk::get_hilbert() {
     
     return num_children > 0 ? children[0]->get_hilbert() : 0;
@@ -296,7 +378,7 @@ List<Shape*> *RTree::Trunk::search( Point *query_point ) {
     SEARCH_IMPLEMENTATION( query_point );
 }
 
-#undef SEARC_IMPLEMENTATION
+#undef SEARCH_IMPLEMENTATION
 
 bool RTree::Trunk::is_full() {
     return num_children == max_children ? true : false;
@@ -354,14 +436,31 @@ void RTree::Trunk::insert( Node *new_node ) {
     }
 }
 
-//Root
-//constructor
+
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Root
+ *      Method:  Root
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
 RTree::Root::Root() {
 
     type = node_root_t;
     parent = NULL;
-}
+}  /* -----  end of method RTree::Root::Root  (constructor)  ----- */
 
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Root
+ *      Method:  RTree::Root :: insert
+ * Description:  Root inserts leaves by sending it to the correct child to be inserted
+ *                  into the first branch that it hits.
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::Root::insert( RTree::Leaf *leaf ) {
 
     if( num_children == 0 ) {
@@ -384,6 +483,17 @@ void RTree::Root::insert( RTree::Leaf *leaf ) {
     }
 }
 
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Root
+ *      Method:  RTree::Root :: insert
+ * Description:  non-leaf nodes are inserted into the correct place according to their
+ *                  greatest hilbert value. If there are too many children already
+ *                  root splits itself (as opposed to overflowing which is what Trunk
+ *                  would normally do).
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::Root::insert( RTree::Trunk *new_node ) {
 
     if( num_children >= max_children ) {
@@ -421,7 +531,7 @@ void RTree::Root::insert( RTree::Trunk *new_node ) {
             children[1]->insert( children_nodes[k] );
         }
 
-    } else {
+    } else { // There is enough room to insert the node
 
         // insert the new shape in the proper place according to it's hilbert value
         int k;
@@ -441,15 +551,22 @@ void RTree::Root::insert( RTree::Trunk *new_node ) {
 
         ++num_children;
     }
-}
+}  /* -----  end of method RTree::Root::insert  ----- */
 
-// Branch
-//constructor
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Branch
+ *      Method:  Branch
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
+
 RTree::Branch::Branch() {
 
-    // initialize all of the variables
     type = node_branch_t;
-}
+}  /* -----  end of method RTree::Branch::Branch  (constructor)  ----- */
 
 void RTree::Branch::overflow( RTree::Node *new_node ) {
     
@@ -490,19 +607,39 @@ void RTree::Branch::insert( Trunk *new_node ) {
     throw "IllegalInsertion";
 }
 
-// Leaf
-//constructors
+void RTree::Branch::consolidate( ) {
+
+}
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Leaf
+ *      Method:  Leaf
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
+
 RTree::Leaf::Leaf() {
 
     type = node_leaf_t;
-}
+}  /* -----  end of method RTree::Leaf::Leaf  (constructor)  ----- */
 
 RTree::Leaf::Leaf( Shape *shape ) {
 
     type = node_leaf_t;
     set( shape );
-}
+}  /* -----  end of method RTree::Leaf::Leaf  (constructor)  ----- */
 
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Leaf
+ *      Method:  RTree::Leaf :: fit_bounds
+ * Description:  This is called by Lazy_bounds evaluate function when the bounds for a
+ *                  leaf need to be calculated. It sets the bounds as the 
+ *                  largest x,y and smallest x,y of any of the points in the shape
+ *
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::Leaf::fit_bounds( Bounding_box &bounds ) {
 
     // look through shape and find the bounds
@@ -513,10 +650,11 @@ void RTree::Leaf::fit_bounds( Bounding_box &bounds ) {
 
     if( shape ) {
         shape->stretch( min_x, min_y, max_x, max_y );
+        bounds.set( min_x, min_y, max_x, max_y );
+    } else {
+
+        bounds.set( 0, 0, 0, 0 );
     }
-    bounds.set( min_x, min_y, max_x, max_y );
-
-
 }
 
 //inspectors
@@ -566,6 +704,16 @@ RTree::Node **RTree::Leaf::adopt_children( int &size ) {
     return NULL;
 }
 
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  RTree::Leaf
+ *      Method:  RTree::Leaf :: insert
+ * Description:  it is illegal to insert into a leaf node so an exception will be thrown
+ *                  if any of these methods are used.
+ *
+ *--------------------------------------------------------------------------------------
+ */
 void RTree::Leaf::insert( RTree::Leaf *leaf ) {
     throw "IllegalInsertion";
 }
@@ -577,4 +725,7 @@ void RTree::Leaf::insert( RTree::Trunk *new_node ) {
 void RTree::Leaf::insert( RTree::Node *new_node ) {
     throw "IllegalInsertion";
 }
+
+
+
 

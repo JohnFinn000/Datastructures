@@ -51,6 +51,7 @@ class Shape {
 public:
     /* ====================  LIFECYCLE     ======================================= */
     Shape();                             /* constructor */
+    ~Shape();                             /* destructor */
 
     /* ====================  ACCESSORS     ======================================= */
 	Point **get_points( int &size );
@@ -99,6 +100,7 @@ public:
     /* ====================  LIFECYCLE     ======================================= */
 	Bounding_box();                             /* constructor */
 	Bounding_box( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y );
+	~Bounding_box();                            /* destructor */
 
     /* ====================  ACCESSORS     ======================================= */
 	intersection_type check_intersection( Point *point );

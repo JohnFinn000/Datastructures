@@ -38,6 +38,7 @@ public:
 
     /* ====================  LIFECYCLE     ======================================= */
     RTree();                             /* constructor */
+    ~RTree();                            /* destructor */
 
     /* ====================  ACCESSORS     ======================================= */
 	List<Shape*> *search( Rectangle *query_window );
@@ -99,6 +100,7 @@ public:
             RTree::Node *owner;
             private: void evaluate();
             public:  void init( RTree::Node *owner );
+            ~Lazy_bounds();
         }; /* -----  end of class Lazy_bounds  ----- */
 
         Lazy_bounds<Bounding_box*> bounds;
@@ -114,6 +116,7 @@ public:
         //constructors
         Node();
         Node( Trunk *parent );
+        ~Node();
 
         //inspectors
 	    virtual List<Shape*> *search( Rectangle *query_window ) = 0;
@@ -171,6 +174,7 @@ public:
         //constructors
         Trunk();
         Trunk( Trunk *parent );
+        ~Trunk();
 
         //inspectors
         virtual uint64_t get_hilbert();
@@ -206,10 +210,12 @@ public:
     public:
         //constructors
         Root();
+        ~Root();
 
         //mutators
         void insert( Leaf  *leaf );
         void insert( Trunk *node );
+        void print( int indent = 0 );
 
         friend class RTree;
     }; /* -----  end of class Root  ----- */
@@ -236,10 +242,12 @@ public:
     public:
         //constructors
         Branch();
+        ~Branch();
 
         //mutators
         void insert( Leaf  *leaf );
         void insert( Trunk *node );
+        void print( int indent = 0 );
 
         friend class RTree;
     }; /* -----  end of class Branch  ----- */
@@ -269,6 +277,7 @@ public:
         //constructors
         Leaf();
         Leaf( Shape *shape );
+        ~Leaf();
 
         //inspectors
 	    List<Shape*> *search( Rectangle *query_window );
@@ -276,6 +285,7 @@ public:
 
         bool is_full();
         bool is_empty();
+        void print( int indent = 0 );
         
         //mutators
         void set( Shape *shape );
@@ -289,8 +299,6 @@ public:
 
         friend class RTree;
     }; /* -----  end of class Leaf  ----- */
-
-
 
     //variables
 	Root *tree_root;

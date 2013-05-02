@@ -30,6 +30,11 @@ RTree::RTree ()
     tree_root = new Root();
 }  /* -----  end of method RTree::RTree  (constructor)  ----- */
 
+RTree::~RTree ()
+{
+    delete( tree_root );
+}  /* -----  end of method RTree::RTree  (destructor)  ----- */
+
 /*
  *--------------------------------------------------------------------------------------
  *       Class:  RTree

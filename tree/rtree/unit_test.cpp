@@ -40,6 +40,8 @@ void verify_rtree() {
 
     t->print_tree();
 
+    delete(t);
+
 }
 /*
 int verify_point() {

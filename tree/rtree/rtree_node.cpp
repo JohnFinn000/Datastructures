@@ -23,13 +23,18 @@
 // the variables it depends on are invalidated
 template <>
 void RTree::Node::Lazy_bounds<Bounding_box*>::evaluate() {
-    value = new Bounding_box( 0, 0, 0, 0 );
     owner->fit_bounds( (*value) );
 }
 
 template <>
 void RTree::Node::Lazy_bounds<Bounding_box*>::init( RTree::Node *o ) {
     owner = o;
+    value = new Bounding_box( 0, 0, 0, 0 );
+}
+
+template <>
+RTree::Node::Lazy_bounds<Bounding_box*>::~Lazy_bounds( ) {
+    delete value;
 }
 
 //Node
@@ -49,16 +54,19 @@ void RTree::Node::Lazy_bounds<Bounding_box*>::init( RTree::Node *o ) {
  */
 RTree::Node::Node() {
 
-	parent = NULL;
     this->bounds.init( this );
+	parent = NULL;
 }  /* -----  end of method RTree::Node::Node  (constructor)  ----- */
 
 RTree::Node::Node( RTree::Trunk *parent ) {
 
-	this->parent = parent;
     this->bounds.init( this );
-    parent->bounds.add_dependant( &(this->bounds) );
+    adopt( parent );
 }  /* -----  end of method RTree::Node::Node  (constructor)  ----- */
+
+RTree::Node::~Node() {
+
+}  /* -----  end of method RTree::Node::Node  (destructor)  ----- */
 
 void RTree::Node::print( int indent ) {
 
@@ -93,9 +101,9 @@ bool RTree::Node::greater_than( Node* a, Node *b ) {
 }
 
 void RTree::Node::adopt( RTree::Trunk *parent ) {
-    this->parent = parent;
-    parent->bounds.add_dependant( &(this->bounds) );
 
+    this->parent = parent;
+    bounds.add_dependant( &(parent->bounds) );
 }
 
 void RTree::Node::consolidate( ) {
@@ -128,8 +136,7 @@ RTree::Trunk::Trunk( RTree::Trunk *parent ) {
     // initialize all of the variables
     type = node_trunk_t;
     num_children = 0;
-    this->parent = parent;
-    parent->bounds.add_dependant( &(this->bounds) );
+    adopt( parent );
 
     for( int i = 0; i < max_children; ++i ) { 
         children[i] = NULL;
@@ -137,6 +144,13 @@ RTree::Trunk::Trunk( RTree::Trunk *parent ) {
 
 }  /* -----  end of method RTree::Trunk::Trunk  (constructor)  ----- */
 
+RTree::Trunk::~Trunk() {
+
+    for( int i = 0; i < num_children; ++i ) { 
+        delete( children[i] );
+    }   
+
+}  /* -----  end of method RTree::Trunk::Trunk  (destructor)  ----- */
 
 /*
  *--------------------------------------------------------------------------------------
@@ -190,6 +204,7 @@ void RTree::Trunk::overflow( Node *new_node ) {
     for( int i = 0; i < num_children; ++i ) {
         Node **adopted_children = children[i]->adopt_children( children_list_size );
         cousin_nodes.add( adopted_children, children_list_size ); 
+        //delete[] adopted_children;
     };
 
     // add in the shape causing the overflow
@@ -225,8 +240,6 @@ void RTree::Trunk::overflow( Node *new_node ) {
             leaves_per = (size / (num_children+1)) + 1; // ex) 8 amoungst 3 results in 3 leaves per for the first 2
         }                                               //     and 2 for the newly added child
 
-        //leaves_per = (size + (num_children)) / (num_children+1); // TODO this might be a better alternative
-
         int i = 0;
         int k = 0;
         for( ; k < (num_children * leaves_per); ) {     // add most of the leaves into the children
@@ -241,16 +254,37 @@ void RTree::Trunk::overflow( Node *new_node ) {
             new_child->insert( cousin_nodes[k] );
         }
 
+        bounds.invalidate();
+
         // if the current node is full this insert will propogate the overflow
-        // TODO there is a problem with propogating the overflow
         this->insert( new_child );
+        consolidate();
 
     } else {
 
         // no split was needed so just redistribute the leaves
         // add the leaves all into the children
         //int leaves_per = size / num_children;
-        int leaves_per = (size + (num_children-1)) / (num_children); // this might be a better alternative
+        int leaves_per;
+        if( size % num_children == 0 ) {            // if the nodes can now be split in evenly ex) 9 amoungst 3
+            leaves_per = (size / num_children);   // then do so
+        } else {                                        // otherwise we need to add 1 to account for the remainder
+            leaves_per = (size / (num_children+1)) + 1; // ex) 8 amoungst 3 results in 3 leaves per for the first 2
+        }                                               //     and 2 for the newly added child
+        int i = 0;
+        int k = 0;
+        for( ; k < ((num_children - 1) * leaves_per); ) {     // add most of the leaves into the children
+            children[i]->insert( cousin_nodes[k] );
+            ++k;
+            if( k % leaves_per == 0 ) {
+                ++i;
+            }
+        }
+
+        for( ; k < size; ++k ) {                        // add the remainder into the new node
+            children[i]->insert( cousin_nodes[k] );
+        }
+/*
         int i = 0;
         for( int k = 0; k < size; ) {
             children[i]->insert( cousin_nodes[k] );
@@ -259,12 +293,13 @@ void RTree::Trunk::overflow( Node *new_node ) {
                 ++i;
             }
         }
+*/
 
         bounds.invalidate();
 
-        for( int i = 0; i < num_children; ++i ) {
-            children[i]->consolidate();
-        }
+        // TODO look into a better method of consolidation
+        // it doesn't need to be done as frequently as it is
+        consolidate();
 	}
 }		/* -----  end of method RTree::Trunk::overflow  ----- */
 
@@ -281,17 +316,42 @@ void RTree::Trunk::consolidate( ) {
     for( int i = 0; i < num_children; ++i ) {
         Node **adopted_children = children[i]->adopt_children( children_list_size );
         cousin_nodes.add( adopted_children, children_list_size ); 
+        //delete[] adopted_children;
     };
 
     int size = cousin_nodes.get_size();
 
     // set the number of children to the actual number we need
-    num_children = (size + (max_children-1)) / max_children;
+    int necessary_children = (size + (max_children-1)) / max_children;
+    for( int i = necessary_children; i < num_children; ++i ) {
+        delete children[i];         // delete any unnecessary children
+    }
+    num_children = necessary_children;
 
     // place the grand children into the children
     
     //int leaves_per = size / num_children;
-    int leaves_per = (size + (num_children-1)) / (num_children); // this might be a better alternative
+    int leaves_per;
+    if( size % num_children == 0 ) {            // if the nodes can now be split in evenly ex) 9 amoungst 3
+        leaves_per = size / num_children;   // then do so
+    } else {                                        // otherwise we need to add 1 to account for the remainder
+        leaves_per = (size / (num_children+1)) + 1; // ex) 8 amoungst 3 results in 3 leaves per for the first 2
+    }                                               //     and 2 for the newly added child
+
+    int i = 0;
+    int k = 0;
+    for( ; k < ((num_children - 1) * leaves_per); ) {     // add most of the leaves into the children
+        children[i]->insert( cousin_nodes[k] );
+        ++k;
+        if( k % leaves_per == 0 ) {
+            ++i;
+        }
+    }
+
+    for( ; k < size; ++k ) {                        // add the remainder into the new node
+        children[i]->insert( cousin_nodes[k] );
+    }
+/*
     int i = 0;
     for( int k = 0; k < size; ) {
         children[i]->insert( cousin_nodes[k] );
@@ -300,6 +360,7 @@ void RTree::Trunk::consolidate( ) {
             ++i;
         }
     }
+*/
 }
 
 
@@ -323,7 +384,7 @@ void RTree::Trunk::print( int indent ) {
     uint64_t min_x, min_y, max_x, max_y;
     b->get( min_x, min_y, max_x, max_y );
 
-    printf("%*sbounds( %lu, %lu, %lu, %lu, %lu, %d ) {\n", indent, "", min_x, min_y, max_x, max_y, get_hilbert(), num_children );
+    printf("%*sTrunk( %lu, %lu, %lu, %lu, %lu, %d ) {\n", indent, "", min_x, min_y, max_x, max_y, get_hilbert(), num_children );
 
     for( int i = 0; i < num_children; ++i ) {
 		children[i]->print( indent + 3 ); 
@@ -338,6 +399,7 @@ RTree::Node **RTree::Trunk::adopt_children( int &size ) {
     Node **children_list = new Node *[size];
 
     for( int i = 0; i < size; ++i ) {
+        children[i]->bounds.clear_dependancies();
         children_list[i] = children[i];
         children[i] = NULL;
     }
@@ -347,38 +409,50 @@ RTree::Node **RTree::Trunk::adopt_children( int &size ) {
     return children_list;
 }
 
-// Rectangle and Point require the same search code but are not inherited 
-// This could possibly be solved with iheritance of a number of other ways
-// TODO find a better solution for this
-// TODO when query is null no further intersection checks need to be done
-#define SEARCH_IMPLEMENTATION( query )                                 \
-    switch( this->bounds.get()->check_intersection( query ) ) {        \
-    case complete_intersection_e:                                      \
-        query = NULL;                                                  \
-    case partial_intersection_e:                                       \
-    {                                                                  \
-        List<Shape*> *results = new List<Shape*>;                      \
-        for( int i = 0; i < num_children; ++i ) {                      \
-            results->splice( *children[i]->search( query ) );          \
-        };                                                             \
-        return results;                                                \
-    }                                                                  \
-    case no_intersection_e:                                            \
-        return NULL;                                                   \
-    }                                                                  \
-    return NULL;
-
 // if query window is NULL then retreive all of the leaves
 List<Shape*> *RTree::Trunk::search( Rectangle *query_window ) {
-    SEARCH_IMPLEMENTATION( query_window );
+    if( query_window ) {
+        switch( this->bounds.get()->check_intersection( query_window ) ) {        
+        case complete_intersection_e:                                      
+            query_window = NULL;                                                  
+        case partial_intersection_e:                                       
+        {                                                                  
+            List<Shape*> *results = new List<Shape*>();                      
+            for( int i = 0; i < num_children; ++i ) {                      
+                results->splice( *children[i]->search( query_window ) );          
+            };                                                             
+            return results;                                                
+        }                                                                  
+        case no_intersection_e:                                            
+            return NULL;
+        }
+    } else {
+        List<Shape*> *results = new List<Shape*>();                      
+        for( int i = 0; i < num_children; ++i ) {                      
+            results->splice( *children[i]->search( query_window ) );          
+        };                                                             
+        return results;                                                
+    }
+    return NULL;
 }
 
 // if query point is NULL then retreive all of the leaves
 List<Shape*> *RTree::Trunk::search( Point *query_point ) {
-    SEARCH_IMPLEMENTATION( query_point );
+    switch( this->bounds.get()->check_intersection( query_point ) ) {        
+    case complete_intersection_e:
+    case partial_intersection_e:                                       
+    {                                                                  
+        List<Shape*> *results = new List<Shape*>();                      
+        for( int i = 0; i < num_children; ++i ) {                      
+            results->splice( *children[i]->search( query_point ) );          
+        };                                                             
+        return results;                                                
+    }                                                                  
+    case no_intersection_e:                                            
+        return NULL;                                                   
+    }                                                                  
+    return NULL;
 }
-
-#undef SEARCH_IMPLEMENTATION
 
 bool RTree::Trunk::is_full() {
     return num_children == max_children ? true : false;
@@ -452,6 +526,8 @@ RTree::Root::Root() {
     parent = NULL;
 }  /* -----  end of method RTree::Root::Root  (constructor)  ----- */
 
+RTree::Root::~Root() {
+}
 
 /*
  *--------------------------------------------------------------------------------------
@@ -504,6 +580,7 @@ void RTree::Root::insert( RTree::Trunk *new_node ) {
         int children_list_size;
         Node **adopted_children = adopt_children( children_list_size );
         children_nodes.add( adopted_children, children_list_size ); 
+        delete[] adopted_children;
 
         // add in the node causing the overflow
         children_nodes.add( new_node );
@@ -552,6 +629,21 @@ void RTree::Root::insert( RTree::Trunk *new_node ) {
         ++num_children;
     }
 }  /* -----  end of method RTree::Root::insert  ----- */
+
+void RTree::Root::print( int indent ) {
+
+    Bounding_box *b = bounds.get();
+    uint64_t min_x, min_y, max_x, max_y;
+    b->get( min_x, min_y, max_x, max_y );
+
+    printf("%*sRoot( %lu, %lu, %lu, %lu, %lu, %d ) {\n", indent, "", min_x, min_y, max_x, max_y, get_hilbert(), num_children );
+
+    for( int i = 0; i < num_children; ++i ) {
+		children[i]->print( indent + 3 ); 
+    }
+
+    printf("%*s}\n", indent, "" );
+}
 
 
 
@@ -605,6 +697,21 @@ void RTree::Branch::insert( Trunk *new_node ) {
 
     // the only thing that can be inserted into branch is leaf nodes
     throw "IllegalInsertion";
+}
+
+void RTree::Branch::print( int indent ) {
+
+    Bounding_box *b = bounds.get();
+    uint64_t min_x, min_y, max_x, max_y;
+    b->get( min_x, min_y, max_x, max_y );
+
+    printf("%*sBranch( %lu, %lu, %lu, %lu, %lu, %d ) {\n", indent, "", min_x, min_y, max_x, max_y, get_hilbert(), num_children );
+
+    for( int i = 0; i < num_children; ++i ) {
+		children[i]->print( indent + 3 ); 
+    }
+
+    printf("%*s}\n", indent, "" );
 }
 
 void RTree::Branch::consolidate( ) {
@@ -678,6 +785,15 @@ List<Shape*> *RTree::Leaf::search( Point *query_point ) {
     } else {
         return NULL;
     }
+}
+
+void RTree::Leaf::print( int indent ) {
+
+    Bounding_box *b = bounds.get();
+    uint64_t min_x, min_y, max_x, max_y;
+
+    b->get( min_x, min_y, max_x, max_y );
+    printf("%*sLeaf( %lu, %lu, %lu, %lu, %lu )\n", indent, "", min_x, min_y, max_x, max_y, get_hilbert() );
 }
 
 bool RTree::Leaf::is_full() {

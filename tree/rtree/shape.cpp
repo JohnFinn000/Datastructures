@@ -23,6 +23,10 @@ Shape::Shape() {
 
 }
 
+Shape::~Shape() {
+    
+
+}
 
 Point **Shape::get_points( int &size ) {
 
@@ -36,6 +40,7 @@ void Shape::add_point( uint64_t x, uint64_t y ) {
 }
 
 void Shape::add_point( Point *p ) {
+
     list_points.add( p );
 }
 
@@ -156,15 +161,33 @@ void Shape::operator=( Shape &shape ) {
  */
 Bounding_box::Bounding_box() {
 
+    p_ul = new Point( 0, 0 );
+    p_ur = new Point( 0, 0 );
+    p_ll = new Point( 0, 0 );
+    p_lr = new Point( 0, 0 );
+    p_center = new Point( 0, 0 );
 	set( 0, 0, 0, 0 );
 }  /* -----  end of method Bounding_box::Bounding_box  (constructor)  ----- */
 
 
 Bounding_box::Bounding_box( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y ) {
 
+    p_ul = new Point( 0, 0 );
+    p_ur = new Point( 0, 0 );
+    p_ll = new Point( 0, 0 );
+    p_lr = new Point( 0, 0 );
+    p_center = new Point( 0, 0 );
 	set( min_x, min_y, max_x, max_y );
 }  /* -----  end of method Bounding_box::Bounding_box  (constructor)  ----- */
 
+Bounding_box::~Bounding_box() {
+
+    delete( p_ul );
+    delete( p_ur );
+    delete( p_ll );
+    delete( p_lr );
+    delete( p_center );
+}
 
 intersection_type Bounding_box::check_intersection( Point *point ) {
 
@@ -207,10 +230,10 @@ uint64_t Bounding_box::get_hilbert() {
 
 void Bounding_box::set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t max_y ) {
 
-    p_ul = new Point( min_x, min_y );
-    p_ur = new Point( max_x, min_y );
-    p_ll = new Point( min_x, max_y );
-    p_lr = new Point( max_x, max_y );
+    p_ul->set_xy( min_x, min_y );
+    p_ur->set_xy( max_x, min_y );
+    p_ll->set_xy( min_x, max_y );
+    p_lr->set_xy( max_x, max_y );
 
     this->min_x = min_x;
     this->min_y = min_y;
@@ -220,7 +243,7 @@ void Bounding_box::set( uint64_t min_x, uint64_t min_y, uint64_t max_x, uint64_t
     this->width = max_x - min_x;
     this->height = max_y - min_y;
 
-    p_center = new Point( min_x + (width/2), min_y + (height/2) );
+    p_center->set_xy( min_x + (width/2), min_y + (height/2) );
 }
 
 void Bounding_box::get( uint64_t &min_x, uint64_t &min_y, uint64_t &max_x, uint64_t &max_y ) {

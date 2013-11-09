@@ -33,16 +33,11 @@ uint64_t LCG( uint64_t seed );
 
 template <typename T>
 void unsort( T arr[], int size ) {
+    static uint64_t seed = time( NULL );
 
     bundle new_arr[size];
     T temp_arr[size];
 
-    static uint64_t seed = time( NULL );
-/*
-    for( int i = 0; i < 10; ++ i ) { 
-        seed = LCG( seed );
-    }
-*/
 
     for( int i = 0; i < size; ++i ) {
         seed = new_arr[i].number = LCG( seed );
@@ -51,6 +46,7 @@ void unsort( T arr[], int size ) {
     }
 
     bubble_sort( new_arr, size, compare_bundle );
+    //TODO: change this to merge sort once it's been templatized
 
     for( int i = 0; i < size; ++i ) {
         arr[i] = temp_arr[new_arr[i].data];

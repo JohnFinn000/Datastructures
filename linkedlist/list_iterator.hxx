@@ -17,17 +17,24 @@
  */
 #ifndef _LIST_ITERATOR_HXX__
 #define _LIST_ITERATOR_HXX__
-
 #include "list.h"
 
 //iterator
 template<class T>
 List<T>::iterator::iterator() {
+    iterable = NULL;
+	current = NULL;
+}
+
+template<class T> //TODO make this a working copy constructor
+List<T>::iterator::iterator( const iterator &other ) {
+    iterable = NULL;
 	current = NULL;
 }
 
 template<class T>
-List<T>::iterator::iterator( link *start ) {
+List<T>::iterator::iterator( List *owner, link *start ) {
+    iterable = owner;
 	current = start;
 }
 
@@ -68,7 +75,7 @@ bool List<T>::iterator::end() {
 
 template<class T>
 bool List<T>::iterator::start() {
-    if( head == current ) {
+    if( iterable->head == current ) {
         return true;
     }
     return false;
@@ -134,6 +141,5 @@ bool List<T>::iterator::operator!=( iterator *iter ) {
 	return false;
 }
 
-
-
 #endif
+

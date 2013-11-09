@@ -49,10 +49,12 @@ void merge_sort( T arr[], int size );
 template <typename T>
 void merge_sort( T arr[], int size, bool (*compfunc)(T, T) );
 
+void LSB_radix_sort( int arr[], int length );
+
 template <typename T>
 void unsort( T arr[], int size );
 
-#include "utilities.hxx"
+#include "utilities.hh"
 #include "bubble_sort.hxx"
 #include "selection_sort.hxx"
 #include "insertion_sort.hxx"

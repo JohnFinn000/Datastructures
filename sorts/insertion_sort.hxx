@@ -18,13 +18,7 @@
 #ifndef _INSERTION_SORT__
 #define _INSERTION_SORT__
 
-#include "utilities.hxx"
-
-template <typename T>
-void insertion_sort( T arr[], int size ) {
-
-    insertion_sort( arr, size, compare );
-}
+#include "utilities.hh"
 
 template <typename T>
 void insertion_sort( T arr[], int size, bool (*compfunc)(T, T) ) {
@@ -47,6 +41,12 @@ void insertion_sort( T arr[], int size, bool (*compfunc)(T, T) ) {
 			}
 		}
 	}
+}
+
+template <typename T>
+void insertion_sort( T arr[], int size ) {
+
+    insertion_sort( arr, size, compare );
 }
 
 #endif

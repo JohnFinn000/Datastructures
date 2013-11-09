@@ -1,17 +1,24 @@
 
 
+GTEST_DIR = ../../gtest-1.7.0
 CC = g++
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -Wextra -pthread -isystem $(GTEST_DIR)/include
 OBJDIR = obj
 
-OBJECTS = unit_test.o
+OBJECTS = linkedlist_ut.o
 
-unit_test: $(OBJECTS)
-	$(CC) $(CFLAGS) -o unit_test $(OBJECTS)
+all: linkedlist_ut
 
-unit_test.o: unit_test.cpp list.h list.hxx list_iterator.hxx
-	$(CC) $(CFLAGS) -c unit_test.cpp
+linkedlist_ut: gtest list.h list.hxx list_iterator.hxx
+	$(CC) $(CFLAGS) unittests/linkedlist_ut.cpp libgtest.a \
+					-o linkedlist_ut
 
+gtest:
+	$(CC) $(CFLAGS) -I${GTEST_DIR} \
+		-c ${GTEST_DIR}/src/gtest-all.cc
+	ar -rv libgtest.a gtest-all.o
+
+.PHONY: clean
 clean:
-	rm unit_test $(OBJECTS)
+	rm linkedlist_ut $(OBJECTS)
 

@@ -20,6 +20,9 @@
 
 #include "utilities.hxx"
 
+// This doesn't quite work yet. The compfunc needs to be stored differently
+// it prolly needs to be in a class so the template works right.
+
 template <typename T>
 T *split( T arr[], int size );
 template <typename T>

@@ -18,12 +18,7 @@
 #ifndef _BUBBLE_SORT__
 #define _BUBBLE_SORT__
 
-#include "utilities.hxx"
-
-template <typename T>
-void bubble_sort( T arr[], int size ) {
-    bubble_sort( arr, size, compare );
-}
+#include "utilities.hh"
 
 template <typename T>
 void bubble_sort( T arr[], int size, bool (*compfunc)( T, T ) ) {
@@ -43,6 +38,11 @@ void bubble_sort( T arr[], int size, bool (*compfunc)( T, T ) ) {
 			}
 		}
 	}
+}
+
+template <typename T>
+void bubble_sort( T arr[], int size ) {
+    bubble_sort( arr, size, compare );
 }
 
 #endif

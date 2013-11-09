@@ -1,0 +1,61 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  generic.hxx
+ *
+ *    Description:  
+ *
+ *        Version:  1.0
+ *        Created:  10/20/2013 01:56:03 AM
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  John Finn (), johnvincentfinn@gmail.com
+ *   Organization:  
+ *
+ * =====================================================================================
+ */
+#ifndef _GENERIC_HXX__
+#define _GENERIC_HXX__
+#include "generic.h"
+
+template<class T>
+void generic<T>::operator+( T num ) {
+
+    add( num );
+}
+
+template<class T>
+void sortable<T>::operator+() {
+
+    sort_ascending();
+}
+
+template<class T>
+void sortable<T>::operator-() {
+
+    sort_descending();
+}
+
+template<class T>
+T iterable<T>::iterator::operator--() {
+    return previous();
+}
+
+template<class T>
+T iterable<T>::iterator::operator++() {
+    return next();
+}
+
+template<class T>
+T iterable<T>::iterator::back() {
+    return previous();
+}
+
+template<class T>
+T iterable<T>::iterator::forward() {
+    return next();
+}
+
+#endif
+

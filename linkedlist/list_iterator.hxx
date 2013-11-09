@@ -19,96 +19,38 @@
 #define _LIST_ITERATOR_HXX__
 #include "list.h"
 
-//iterator
+//forward_iterator
 template<class T>
-List<T>::iterator::iterator() {
+List<T>::forward_iterator::forward_iterator() {
     iterable = NULL;
 	current = NULL;
 }
 
 template<class T> //TODO make this a working copy constructor
-List<T>::iterator::iterator( const iterator &other ) {
+List<T>::forward_iterator::forward_iterator( const forward_iterator &other ) {
     iterable = NULL;
 	current = NULL;
 }
 
 template<class T>
-List<T>::iterator::iterator( List *owner, link *start ) {
+List<T>::forward_iterator::forward_iterator( List *owner, link *start ) {
     iterable = owner;
 	current = start;
 }
 
 template<class T>
-T List<T>::iterator::next() {
+T* List<T>::forward_iterator::next() {
 	if( current ) {
 		current = current->next;
         if( current ) {
-            return *current->node;
+            return current->node;
         }
 	}
 	return 0;
 }
 
 template<class T>
-T List<T>::iterator::get() {
-	if( current ) {
-		return *current->node;
-	}
-	return 0;
-}
-
-template<class T>
-void List<T>::iterator::insert( T *node ) {
-}
-
-template<class T>
-void List<T>::iterator::set( T *node ) {
-}
-
-template<class T>
-bool List<T>::iterator::end() {
-    if( current ) {
-        return false;
-    }
-    return true;
-}
-
-template<class T>
-bool List<T>::iterator::start() {
-    if( iterable->head == current ) {
-        return true;
-    }
-    return false;
-}
-
-//sugar
-template<class T>
-T *List<T>::iterator::operator+( T node ) {
-	if( current ) {
-		return this.current->node + node;
-	}
-	return NULL;
-}	
-
-template<class T>
-T *List<T>::iterator::operator-( T node ) {
-	if( current ) {
-		return this.current->node - node;
-	}
-	return NULL;
-}
-
-template<class T>
-T *List<T>::iterator::operator++() {
-	if( current ) {
-		current = current->next;
-		return current->node;
-	}
-	return NULL;
-}
-
-template<class T>
-T *List<T>::iterator::operator++(int) {
+T* List<T>::forward_iterator::next_() {
 	T *temp = NULL;;
 	if( current ) {
 		temp = current->node;
@@ -118,7 +60,61 @@ T *List<T>::iterator::operator++(int) {
 }
 
 template<class T>
-bool List<T>::iterator::operator==( T node ) {
+T* List<T>::forward_iterator::get() {
+	if( current ) {
+		return current->node;
+	}
+	return 0;
+}
+
+template<class T>
+void List<T>::forward_iterator::insert( T& node __attribute__((unused)) ) {
+}
+
+template<class T>
+T* List<T>::forward_iterator::remove() {
+    return NULL;
+}
+
+template<class T>
+void List<T>::forward_iterator::set( T& node __attribute__((unused)) ) {
+}
+
+template<class T>
+bool List<T>::forward_iterator::end() {
+    if( current ) {
+        return false;
+    }
+    return true;
+}
+
+template<class T>
+bool List<T>::forward_iterator::start() {
+    if( iterable->head == current ) {
+        return true;
+    }
+    return false;
+}
+
+//sugar
+template<class T>
+T *List<T>::forward_iterator::operator+( T node ) {
+	if( current ) {
+		return this.current->node + node;
+	}
+	return NULL;
+}	
+
+template<class T>
+T *List<T>::forward_iterator::operator-( T node ) {
+	if( current ) {
+		return this.current->node - node;
+	}
+	return NULL;
+}
+
+template<class T>
+bool List<T>::forward_iterator::operator==( T node ) {
 	if( this.node == node ) {
 		return true;
 	}
@@ -126,7 +122,7 @@ bool List<T>::iterator::operator==( T node ) {
 }
 
 template<class T>
-bool List<T>::iterator::operator==( iterator *iter ) {
+bool List<T>::forward_iterator::operator==( forward_iterator *iter ) {
 	if( current == iter->current() ) {
 		return true;
 	}
@@ -134,7 +130,7 @@ bool List<T>::iterator::operator==( iterator *iter ) {
 }
 
 template<class T>
-bool List<T>::iterator::operator!=( iterator *iter ) {
+bool List<T>::forward_iterator::operator!=( forward_iterator *iter ) {
 	if( current != iter->current() ) {
 		return true;
 	}

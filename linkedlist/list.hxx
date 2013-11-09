@@ -59,7 +59,6 @@ void List<T>::add_front( T node ) {
 
 }
 
-
 template<class T>
 void List<T>::add_back( T node ) {
     link *new_node = new link;
@@ -75,7 +74,7 @@ void List<T>::add_back( T node ) {
 }
 
 template<class T>
-void List<T>::splice( List splicee ) {
+void List<T>::splice( List splicee ) { //TODO make sure this works correctly
 	(*tail) = &(*splicee.get_head());
     tail = splicee.get_tail();
 }
@@ -94,12 +93,17 @@ T List<T>::remove_front() {
 }
 
 template<class T>
-T List<T>::get() {
+T* List<T>::get( int index __attribute__((unused))) {
 	if( head ) {
-        return *head->node;
+        return head->node;
 	} else {
         return 0;
     }
+}
+
+template<class T>
+T& List<T>::get_now( int index __attribute__((unused)) ) {
+    return *head->node;
 }
 
 template<class T>
@@ -113,14 +117,14 @@ typename List<T>::link **List<T>::get_tail() {
 }
 
 template<class T>
-typename List<T>::iterator *List<T>::begin() {
-	List::iterator *iter = new List::iterator( this, head );
+typename List<T>::forward_iterator *List<T>::begin() {
+	List::forward_iterator *iter = new List::forward_iterator( this, head );
 	return iter;
 }
 
 template<class T>
-typename List<T>::iterator *List<T>::end() {
-	List::iterator *iter = new List::iterator( this, *tail );
+typename List<T>::forward_iterator *List<T>::end() {
+	List::forward_iterator *iter = new List::forward_iterator( this, *tail );
 	return iter;
 }
 

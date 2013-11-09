@@ -47,34 +47,36 @@ private:
 public:
     /*
      * =====================================================================================
-     *        Class:  iterator
+     *        Class:  forward_iterator
      *  Description:  is used to iterate through the list
      * =====================================================================================
      */
-	class iterator: public iterable<T>::iterator {
+	class forward_iterator: public iterable<T>::forward_iterator {
 	public:
 
         /* ====================  LIFECYCLE     ======================================= */
-        iterator();                             /* constructor      */
-        iterator( const iterator &other );   /* copy constructor */
-        ~iterator();                            /* destructor       */
+        forward_iterator();                             /* constructor      */
+        forward_iterator( const forward_iterator &other );   /* copy constructor */
+        ~forward_iterator();                            /* destructor       */
 
-		iterator( List *owner, link *start );
+		forward_iterator( List *owner, link *start );
 		
         /* ====================  ACCESSORS     ======================================= */
-		T next();
-		T get();
-
-        /* ====================  MUTATORS      ======================================= */
-		void insert( T *node ); // not implemented
-		void set( T *node );    // not implemented
-
         bool end();
         bool start();
 
+        T* next();
+        T* next_();
+        T* get();
+
+        /* ====================  MUTATORS      ======================================= */
+		void insert( T& node ); // not implemented
+        T* remove();    // not implemented
+		void set( T& node );    // not implemented
+
         /* ====================  OPERATORS     ======================================= */
 
-        iterator& operator = ( const iterator &other ); /* assignment operator */
+        forward_iterator& operator = ( const forward_iterator &other ); /* assignment operator */
 
 		T *operator+( T node );
 		T *operator-( T node );
@@ -82,8 +84,8 @@ public:
 		T *operator++( int ); // suffix
 		bool operator==( T node );
 		bool operator==( List l );
-		bool operator==( iterator *iter );
-		bool operator!=( iterator *iter );
+		bool operator==( forward_iterator *iter );
+		bool operator!=( forward_iterator *iter );
 
 	private:
         /* ====================  DATA MEMBERS  ======================================= */
@@ -103,11 +105,12 @@ public:
 	void add_back( T node );
 	void splice( List splicee );
 	T    remove_front();
-	T    get();
 
     /* ====================  ACCESSORS     ======================================= */
-	List<T>::iterator *begin();
-	List<T>::iterator *end();
+	T*    get( int index = 0 );
+	T&    get_now( int index = 0 );
+	List<T>::forward_iterator *begin();
+	List<T>::forward_iterator *end();
 
     /* ====================  OPERATORS     ======================================= */
 

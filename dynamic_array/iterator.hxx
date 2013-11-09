@@ -15,6 +15,8 @@
  *
  * =====================================================================================
  */
+#ifndef _ITERATOR_HXX__
+#define _ITERATOR_HXX__
 #include "dynamic_array.hh"
 
 //iterator
@@ -59,51 +61,73 @@ bool Dynamic_array<T>::iterator::start() {
 }
 
 template<class T>
-T Dynamic_array<T>::iterator::next() {
+T* Dynamic_array<T>::iterator::next() {
 
     if( current_index == owner->size ) {
         return 0;
     } else {
         ++current_index;
-        return owner->data[current_index];
+        return &owner->data[current_index];
     }
 }
 
 template<class T>
-T Dynamic_array<T>::iterator::previous() {
+T* Dynamic_array<T>::iterator::next_() {
+
+    if( current_index == owner->size ) {
+        return 0;
+    } else {
+        ++current_index;
+        return &owner->data[current_index-1];
+    }
+}
+
+template<class T>
+T* Dynamic_array<T>::iterator::previous() {
 
     if( current_index < 0 ) {
         return 0;
     } else {
         --current_index;
-        return owner->data[current_index];
+        return &owner->data[current_index];
     }
 }
 
 template<class T>
-T Dynamic_array<T>::iterator::get() {
+T* Dynamic_array<T>::iterator::previous_() {
 
-    return owner->data[current_index];
-}
-
-//sugar
-template<class T>
-T Dynamic_array<T>::iterator::operator++() {
-    return forward();
-}
-
-template<class T>
-T Dynamic_array<T>::iterator::operator--() {
-    return previous();
+    if( current_index < 0 ) {
+        return 0;
+    } else {
+        --current_index;
+        return &owner->data[current_index+1];
+    }
 }
 
 template<class T>
-T Dynamic_array<T>::iterator::forward() {
-    return next();
+T* Dynamic_array<T>::iterator::get() {
+
+    return &owner->data[current_index];
 }
+
 
 template<class T>
-T Dynamic_array<T>::iterator::back() {
-    return previous();
+void Dynamic_array<T>::iterator::insert( T val ) {
+
+    //TODO insert
 }
 
+
+template<class T>
+T* Dynamic_array<T>::iterator::remove() {
+
+    return &owner->data[current_index];
+}
+
+
+template<class T>
+void Dynamic_array<T>::iterator::set( T val ) {
+    
+}
+
+#endif

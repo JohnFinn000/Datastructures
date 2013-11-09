@@ -29,7 +29,7 @@
  * =====================================================================================
  */
 template<class T>
-class Dynamic_array {
+class Dynamic_array: public generic<T>, sortable<T>, iterable<T> {
 public:
 
     
@@ -39,7 +39,7 @@ public:
      *  Description:  
      * =====================================================================================
      */
-    class iterator {
+    class iterator: public iterable<T>::iterator  {
     public:
         /* ====================  LIFECYCLE     ======================================= */
         iterator();                             /* constructor      */
@@ -53,22 +53,20 @@ public:
         bool end();
         bool start();
 
-        T next();
-        T previous();
-        T get();
+        T* next();
+        T* next_();
+        T* previous();
+        T* previous_();
+        T* get();
 
         /* ====================  MUTATORS      ======================================= */
         void insert( T num );
+        T* remove();
         void set( T num );
 
         /* ====================  OPERATORS     ======================================= */
         iterator& operator=( const iterator &other ); /* assignment operator */
 
-        T operator--(); 
-        T operator++(); 
-        T forward();
-        T back();
-        
     private: 
         /* ====================  DATA MEMBERS  ======================================= */
         Dynamic_array<T> *owner;
@@ -212,9 +210,11 @@ public:
 
     void sort();
     void sort( bool (*compfunc)(T, T) );
+    void sort_ascending( );
+    void sort_descending( );
 
     /* ====================  ACCESSORS     ======================================= */
-    T& get( int index );     // bounds checking
+    T* get( int index );     // bounds checking
     T& get_now( int index ); // no bounds checking
 
     int get_size();
@@ -243,4 +243,5 @@ private:
 }; /* -----  end of template class Dynamic_array  ----- */
 
 #include "dynamic_array.hxx"
+#include "iterator.hxx"
 #endif

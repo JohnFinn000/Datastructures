@@ -71,7 +71,7 @@ Dynamic_array<T>::~Dynamic_array() {
 }
 
 template<class T>
-void Dynamic_array<T>::add( T num ) {
+void Dynamic_array<T>::add( T val ) {
     
     // resize if more space is needed
     if( size >= capacity ) {
@@ -80,7 +80,7 @@ void Dynamic_array<T>::add( T num ) {
 
     // size-1 is the index. Since we know the size will be
     // incremented in a second we use the current size as the index
-    data[size] = num;
+    data[size] = val;
     ++size;
 }
 
@@ -172,16 +172,26 @@ void Dynamic_array<T>::sort( bool (*compfunc)(T, T) ) {
 }
 
 template<class T>
-T& Dynamic_array<T>::get( int index ) {
+void Dynamic_array<T>::sort_ascending() {
+
+    insertion_sort( data, size );
+}
+
+template<class T>
+void Dynamic_array<T>::sort_descending() {
+
+    insertion_sort( data, size );
+}
+
+template<class T>
+T* Dynamic_array<T>::get( int index ) {
 
     if( index < 0 ) { // not valid (obviously)
         return NULL;
     } else if( index < size ) { // this is okay
-        return data[index];
-    } else { // also not valid
-        return NULL;
+        return &data[index];
     }
-
+    return NULL;
 }
 
 template<class T>
@@ -204,14 +214,14 @@ int Dynamic_array<T>::get_capacity() {
 template<class T>
 typename Dynamic_array<T>::iterator *Dynamic_array<T>::begin() {
 
-    Dynamic_array::iterator *iter = new Dynamic_array::iterator( this );
+    Dynamic_array<T>::iterator *iter = new Dynamic_array<T>::iterator( this, 0 );
     return iter;
 }
 
 template<class T>
 typename Dynamic_array<T>::iterator *Dynamic_array<T>::end() {
 
-    Dynamic_array::iterator *iter = new Dynamic_array::iterator( this, size-1 );
+    Dynamic_array<T>::iterator *iter = new Dynamic_array<T>::iterator( this, size-1 );
     return iter;
 }
 

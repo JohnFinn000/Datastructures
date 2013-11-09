@@ -17,6 +17,7 @@
  * =====================================================================================
  */
 
+// These are the base tables that are used to generate larger tables
 const uint8_t hilbert_table[] = {
     0, 1, 3, 2,
     0, 3, 1, 2,
@@ -144,6 +145,7 @@ const uint16_t xy_table_256[1024] = {
 
 // this takes 5 bit hilbert curve numbers
 // I'm fairly confident I can get this smaller and still have a low number of table look ups and a low number of operations
+// Still in the process of using this one
 const uint16_t xy_table_655356[1024] = {
 0000,0X01,0X01,0000,0000,0000,0X01,0X01,0X02,0X02,0X03,0X03,0X03,0X02,0X02,0X03,
 0X04,0X04,0X05,0X05,0X06,0X07,0X07,0X06,0X06,0X07,0X07,0X06,0X05,0X05,0X04,0X04,

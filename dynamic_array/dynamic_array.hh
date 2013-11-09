@@ -20,72 +20,98 @@
 #include <stdlib.h>
 #include <math.h>
 #include "../linkedlist/list.h"
+#include "../sorts/insertion_sort.hxx"
 
+/* 
+ * =====================================================================================
+ *        Class:  Dynamic_array
+ *  Description:  
+ * =====================================================================================
+ */
 template<class T>
 class Dynamic_array {
-private:
-    int capacity;
-    int size;
-
-    T *data;
-
 public:
+
+    
+    /*
+     * =====================================================================================
+     *        Class:  iterator
+     *  Description:  
+     * =====================================================================================
+     */
     class iterator {
     public:
-        iterator();
+        /* ====================  LIFECYCLE     ======================================= */
+        iterator();                             /* constructor      */
+        iterator( const iterator &other );   /* copy constructor */
         iterator( Dynamic_array<T> *o );
         iterator( Dynamic_array<T> *o, int start );
+
+        ~iterator ();                            /* destructor       */
+
+        /* ====================  ACCESSORS     ======================================= */
+        bool end();
+        bool start();
 
         T next();
         T previous();
         T get();
 
+        /* ====================  MUTATORS      ======================================= */
         void insert( T num );
         void set( T num );
 
-        bool end();
-        bool start();
+        /* ====================  OPERATORS     ======================================= */
+        iterator& operator=( const iterator &other ); /* assignment operator */
 
-        //sugar
         T operator--(); 
         T operator++(); 
         T forward();
         T back();
         
     private: 
+        /* ====================  DATA MEMBERS  ======================================= */
         Dynamic_array<T> *owner;
         int current_index;
-    };
+    }; /* -----  end of class iterator  ----- */
 
-/*  
- *  These do operations in an APL esque manner
- *  each operation is done on the whole mass group
- *
- *  logic operators will return a new mass with only elements
- *  fulfilling that condition
- *  
- *  m += 7 will add 7 to every element of the mass
- *
- *  sorting a mass will NOT sort the actual information
- *
- *  to use comparisons or sorts on information other than numbers
- *  input a comparison function to handle that sort of thing
- *
- *  it is important to note that changes to the array should not
- *  be made at the same time a mass is in use
- *
- *  */
+    /*
+     * =====================================================================================
+     *        Class:  mass
+     *  Description:  An experimental feature I thought would be interesting to have
+     *
+     *  These do operations in an APL-esque manner
+     *  each operation is done on the whole mass group
+     *
+     *  logic operators will return a new mass with only elements
+     *  fulfilling that condition
+     *  
+     *  m += 7 will add 7 to every element of the mass
+     *
+     *  sorting a mass will NOT sort the actual information
+     *
+     *  to use comparisons or sorts on information other than numbers
+     *  input a comparison function to handle that sort of thing
+     *
+     *  it is important to note that changes to the array should not
+     *  be made at the same time a mass is in use
+     *
+     *  I hope to incorporate multithreading into this so it will be possible to 
+     *  multithread array operations without much hassle
+     *
+     * =====================================================================================
+     */
+
     class mass {
-    private:
-        Dynamic_array<T> *owner;
-        int *indices;
-        int num_indices;
-        int size;
-
     public:
-        //constructors
-        mass();
+        /* ====================  LIFECYCLE     ======================================= */
+        mass();                             /* constructor      */
+        mass( const mass &other );   /* copy constructor */
         mass( Dynamic_array<T> *o );
+
+        ~mass();                            /* destructor       */
+
+        /* ====================  OPERATORS     ======================================= */
 
         //logic functions
         mass &equal(         T param );
@@ -112,11 +138,13 @@ public:
         void sort_descending( );
 
         T *get( int &size ); // not implemented
-        mass &duplicate();
         int get_size();
 
+        mass &duplicate();
+
+        mass& operator=( const mass &other ); /* assignment operator */
+
         //sugar 
-        
         //logic operators 
         mass &operator==( T param );            // equal
         mass &operator!=( T param );            // not_equal
@@ -136,35 +164,42 @@ public:
         T operator/=( T param ); // divide
         T operator%=( T param ); // modulo
 
-        mass &operator+( T param ); 
-        mass &operator-( T param ); 
-        mass &operator*( T param ); 
-        mass &operator/( T param ); 
-        mass &operator%( T param ); 
+        mass &operator+( T param ); // add
+        mass &operator-( T param ); // subtracy
+        mass &operator*( T param ); // multiply
+        mass &operator/( T param ); // divide
+        mass &operator%( T param ); // modulo
 
         //misc
         T operator++(int); // suffix 
 
-        // sort
+        //sort
         void operator+(); // sort_ascending
         void operator-(); // sort_descending
 
         bool operator!( );
 
-    };
+    private:
+        /* ====================  DATA MEMBERS  ======================================= */
+        Dynamic_array<T> *owner;
+        int *indices;
+        int num_indices;
+        int size;
+
+    }; /* -----  end of class mass  ----- */
 
     friend class iterator;
     friend class mass;
 
-//constructor
-    Dynamic_array();
+    // ====================  LIFECYCLE     =======================================
+    Dynamic_array();                           /* constructor      */
+    Dynamic_array( const Dynamic_array &other ); /* copy constructor */
     Dynamic_array( int initial_size );
     Dynamic_array( T arr[], int array_size, int initial_size );
+    ~Dynamic_array();                          /* destructor       */
 
-//destructor
-    ~Dynamic_array();
 
-//mutators
+    /* ====================  MUTATORS      ======================================= */
     void add( T num );
     void add( T arr[], int arr_size );
     void add( Dynamic_array<T> *d_arr );
@@ -172,28 +207,40 @@ public:
 
     void insert( T num, int index );
 
-//inspectors
+    void resize( int new_size );
+    void fit();
+
+    void sort();
+    void sort( bool (*compfunc)(T, T) );
+
+    /* ====================  ACCESSORS     ======================================= */
     T& get( int index );     // bounds checking
     T& get_now( int index ); // no bounds checking
 
     int get_size();
     int get_capacity();
 
-//methods
-    void resize( int new_size );
-    void fit();
-    void sort(); // needs comparison function
-
     Dynamic_array<T>::iterator *begin();
     Dynamic_array<T>::iterator *end();
 
     Dynamic_array<T>::mass *mass_op();
 
-//sugar
+    /* ====================  OPERATORS     ======================================= */
+
+    Dynamic_array& operator=( const Dynamic_array &other ); // assignment operator
+
     T& operator[]( int index ); // does not do bounds checking (get_now)
     void operator+( T num );    // same as add
+    void operator+( Dynamic_array<T> *arr );    // same as add
     
-};
+private:
+    /* ====================  DATA MEMBERS  ======================================= */
+    int capacity;
+    int size;
+
+    T *data;
+
+}; /* -----  end of template class Dynamic_array  ----- */
 
 #include "dynamic_array.hxx"
 #endif

@@ -26,6 +26,8 @@ void verify_rtree() {
     RTree *t;
     t = new RTree();
 
+    printf("type a character and hit enter to insert a shape into the rtree\n");
+
     char p;
     Shape shape_list[200];
     for( int i = 0; i < 20; ++i ) {
@@ -33,9 +35,9 @@ void verify_rtree() {
         shape_list[i].add_point(5*(i+1),(i+1)*10);
         shape_list[i].add_point(5*(i+1),(i+1)*10);
         t->insert( (shape_list+i) );
-        scanf("%c\n",&p );
         
         t->print_tree();
+        scanf("%c\n",&p );
     }
 
     t->print_tree();

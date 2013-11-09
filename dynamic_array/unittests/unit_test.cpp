@@ -24,7 +24,7 @@ int main() {
 
     Dynamic_array<int> dyn_arr;
 
-    for( int i = 0; i < 10; ++i ) {
+    for( int i = 0; i < 5; ++i ) {
         dyn_arr.add( (i*52353151353) % 500 );
     }
 
@@ -34,8 +34,9 @@ int main() {
     int size = dyn_arr.get_size();
     for( int i = 0; i < size; ++i ) {
         dyn_arr.get_now(i) += 13252;
-        printf("element %d: %d \n", i, dyn_arr.get_now(i) );
+        printf("%d, ", dyn_arr.get_now(i) );
     }
+    printf("\n");
 
     printf("array addition \n");
     int arr[5] = { 512, 24, 2 ,4, 6 };
@@ -43,21 +44,45 @@ int main() {
 
     size = dyn_arr.get_size();
     for( int i = 0; i < size; ++i ) {
-        printf("element %d: %d \n", i, dyn_arr.get_now(i) );
+        printf("%d, ", dyn_arr.get_now(i) );
     }
+    printf("\n");
+
+    printf("dynamic array addition \n");
+    Dynamic_array<int> new_arr;
+    for( int i = 100; i < 110; ++i ) {
+        new_arr.add( i );
+    }
+    dyn_arr.add( &new_arr );
+    size = dyn_arr.get_size();
+    for( int i = 0; i < size; ++i ) {
+        printf("%d, ", dyn_arr.get_now(i) );
+    }
+    printf("\n");
+
+    printf("sort\n");
+    dyn_arr.sort();
+    size = dyn_arr.get_size();
+    for( int i = 0; i < size; ++i ) {
+        printf("%d, ", dyn_arr.get_now(i) );
+    }
+    printf("\n");
+
+    // Iterator tests
+    Dynamic_array<int>::iterator *iter;
 
     printf("iterator forward \n");
-    Dynamic_array<int>::iterator *iter = dyn_arr.begin();
-    for( ; !iter->end(); iter->next() ) {
-        printf("%d\n", iter->get() );
+    for( iter = dyn_arr.begin(); !iter->end(); iter->next() ) {
+        printf("%d, ", iter->get() );
     }
+    printf("\n");
 
     printf("iterator backward \n");
-    iter = dyn_arr.end();
-    for( ; !iter->start(); iter->previous() ) {
-        printf("%d\n", iter->get() );
+    for( iter = dyn_arr.end(); !iter->start(); iter->previous() ) {
+        printf("%d, ", iter->get() );
     }
-
+    printf("\n");
+/*
     Dynamic_array<int>::mass m( &dyn_arr );
     
     printf("iterator forward \n");
@@ -88,6 +113,7 @@ int main() {
     for( ; !iter->end(); iter->next() ) {
         printf("%d\n", iter->get() );
     }
+*/
 }
 
 

@@ -71,17 +71,13 @@ public:
 
         /* ====================  MUTATORS      ======================================= */
 		void insert( T& node ); // not implemented
-        T* remove();    // not implemented
+        T* remove();            // not implemented
 		void set( T& node );    // not implemented
 
         /* ====================  OPERATORS     ======================================= */
 
         forward_iterator& operator = ( const forward_iterator &other ); /* assignment operator */
 
-		T *operator+( T node );
-		T *operator-( T node );
-		T *operator++();      // prefix
-		T *operator++( int ); // suffix
 		bool operator==( T node );
 		bool operator==( List l );
 		bool operator==( forward_iterator *iter );
@@ -124,53 +120,6 @@ public:
     friend class iterator;
 }; /* -----  end of class List  ----- */
 
-#if 0
-    /*
-     * =====================================================================================
-     *        Class:  iterator
-     *  Description:  is used to iterate through the list
-     * =====================================================================================
-     */
-	class iterator {
-	public:
-
-        /* ====================  LIFECYCLE     ======================================= */
-        iterator();                             /* constructor      */
-        iterator( const iterator &other );   /* copy constructor */
-        ~iterator();                            /* destructor       */
-
-		iterator( link *start );
-		
-        /* ====================  ACCESSORS     ======================================= */
-		T next();
-		T get();
-
-        /* ====================  MUTATORS      ======================================= */
-		void insert( T *node ); // not implemented
-		void set( T *node );    // not implemented
-
-        bool end();
-        bool start();
-
-        /* ====================  OPERATORS     ======================================= */
-
-        iterator& operator = ( const iterator &other ); /* assignment operator */
-
-		T *operator+( T node );
-		T *operator-( T node );
-		T *operator++();      // prefix
-		T *operator++( int ); // suffix
-		bool operator==( T node );
-		bool operator==( List l );
-		bool operator==( iterator *iter );
-		bool operator!=( iterator *iter );
-
-	private:
-        /* ====================  DATA MEMBERS  ======================================= */
-		link *current;
-
-    }; /* -----  end of class Iterator  ----- */
-#endif
 #include "list.hxx"
 #include "list_iterator.hxx"
 #endif

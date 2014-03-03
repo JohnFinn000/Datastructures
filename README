@@ -1,14 +1,47 @@
+This probably wont see much more work since I've decided to get over
+my insanity and just use boost.
 
-List
+Inheritance:
 
-Dynamic_array
+Generic
+|-List
+| |-Singly Linked
+| `-Doubly Linked
+|-Dynamic Array
+|-Hash Table
+`-Tree
+  `-RTree
+
+DataStructures:
+    [ ] List
+        [/] Singly linked list
+            [ ] unit tests
+        [ ] Doubly linked list
+            [ ] unit tests
+        [ ] Skip list
+            [ ] unit tests
+
+        [ ] iterator
+        [ ] unit tests
+    [/] Dynamic_array
+        [/] Mass
+        [ ] iterator
+        [ ] unit tests
+    [ ] Hash Table
+    [ ] Tree
+        [/] Rtree
+        [ ] iterator
+
+Abstract Data Types
+    Queue
+    Stack
 
 Sorts:
-bubble_sort
-insertion_sort
-selection_sort
-merge_sort
-radix_sort
+    [/] bubble_sort
+    [/] insertion_sort
+    [/] selection_sort
+    [/] merge_sort
+    [/] radix_sort
 
 Testing:
 
